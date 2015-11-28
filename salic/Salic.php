@@ -15,11 +15,14 @@ class Salic
     public $pages, $contents;
     protected $twig;
 
+    protected $baseTemplate;
+
     /**
      * Salic constructor.
      */
     public function __construct()
     {
+        $this->baseTemplate = 'base.html.twig';
     }
 
     public function init()
@@ -38,8 +41,8 @@ class Salic
     private function loadPages()
     {
         $this->pages = array(
-            'home' => array('name' => "Home"),
-            'page2' => array('name' => "Page 2"),
+            'home' => array('name' => "Home", 'template' => "headline_with_text"),
+            'page2' => array('name' => "Page 2", 'template' => "headline_with_text"),
         );
         Utils::generatePageHrefs($this->pages); // generates the href values
 
@@ -60,21 +63,37 @@ class Salic
             throw new ShouldNotHappenException("No content defined for page '$pagekey'");
         }
 
-        echo $this->twig->render('index.html.twig', array(
+        $page = $this->pages[$pagekey];
+        $this->doRenderPage($page['template'] . '.html.twig', array(
             'pages' => $this->pages,
             'title' => 'SALiC Test page',
-            'headline' => $this->pages[$pagekey]['name'],
+            'headline' => $page['name'],
             'content' => $this->contents[$pagekey],
         ));
     }
 
     private function render404()
     {
-        echo $this->twig->render('index.html.twig', array(
+        echo $this->twig->render($this->baseTemplate, array(
             'pages' => $this->pages,
             'title' => 'Error 404',
-            'headline' => "Error 404 - Page not Found",
-            'content' => "Sorry, but the page you are looking for doesn't exist!<br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
+            'content' => "<h1>Error 404 - Page not Found</h1>Sorry, but the page you are looking for doesn't exist!<br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
         ));
     }
+
+    protected function doRenderPage($templatefile, $vars)
+    {
+        echo $this->twig->render($templatefile, $vars);
+    }
+}
+
+class SalicMng extends Salic
+{
+
+    protected function doRenderPage($templatefile, $vars)
+    {
+        $vars['parent_template'] = $templatefile;
+        parent::doRenderPage('manage.html.twig', $vars);
+    }
+
 }

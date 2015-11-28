@@ -1,0 +1,19 @@
+{% extends parent_template %}
+
+{% block body %}
+    <div class="salic-manage-bar"> {# TODO: outsource manage bar? #}
+        SALiC Manage Mode
+    </div>
+
+    {{ parent() }}
+{% endblock %}
+
+{% block scripts_top %}
+    {{ parent() }}
+    <link rel="stylesheet" href="salic/manage.css">
+{% endblock %}
+
+{% block scripts_bottom %}
+    {{ parent() }}
+    <script type="text/javascript" src="salic/manage.js"></script>
+{% endblock %}
