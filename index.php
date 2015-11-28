@@ -1,15 +1,13 @@
 <?php
-use salic\Parser;
+namespace salic;
 
-require_once('salic/init.php');
+require_once('salic/Salic.php');
 
-$result = Parser::parseFile('templates/index.html', array(
-    'headline' => "Headline",
-    'content' => "Test Content <br>Hi, <b>there</b>!",
-    'staticlist' => array('Static 1', "Static 2"),
-    'dynamiclist' => array(),
-));
+$salic = new Salic();
+$salic->init();
 
-echo "<br><br>Result:<table border='1'><tr><td><pre>" .htmlentities($result). "</pre></td><td>$result</td></tr></table>";
+$pagekey = isset($_GET['page']) ? @$_GET['page'] : 'home';
+
+$salic->renderPage($pagekey);
 
 ?>
