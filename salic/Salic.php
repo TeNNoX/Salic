@@ -43,12 +43,14 @@ class Salic
         $this->pages = array(
             'home' => array('name' => "Home", 'template' => "headline_with_text"),
             'page2' => array('name' => "Page 2", 'template' => "headline_with_text"),
+            'page3' => array('name' => "Page 3"),
         );
         Utils::generatePageHrefs($this->pages); // generates the href values
 
         $this->contents = array(
             'home' => "<p>This is some <i>Test Content</i> for the main page.</p>",
             'page2' => "<p>This is some <b>extra spicy</b> <i>Test Content</i> for the second page.</p>",
+            'page3' => "<b>No template used for this one</b><br><h2>So... here's a list for you</h2><ul><li>Test 1</li><li>Test 2</li></ul><i>we don't have ice anymore, so you have to be content with that. :/</i>",
         );
     }
 
@@ -64,7 +66,8 @@ class Salic
         }
 
         $page = $this->pages[$pagekey];
-        $this->doRenderPage($page['template'] . '.html.twig', array(
+        $template = @$page['template'] ? $page['template'] . '.html.twig' : $this->baseTemplate;
+        $this->doRenderPage($template, array(
             'pages' => $this->pages,
             'title' => 'SALiC Test page',
             'headline' => $page['name'],
@@ -74,7 +77,7 @@ class Salic
 
     private function render404()
     {
-        echo $this->twig->render($this->baseTemplate, array(
+        $this->doRenderPage($this->baseTemplate, array(
             'pages' => $this->pages,
             'title' => 'Error 404',
             'content' => "<h1>Error 404 - Page not Found</h1>Sorry, but the page you are looking for doesn't exist!<br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
