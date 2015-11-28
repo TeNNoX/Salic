@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SALiC Test Page</title>
+</head>
+<body>
+
+    <div id="content">
+        {{* block: content.html *}}
+
+        <h1>{{: headline }}</h1>
+        <p>{{: content }}</p>
+
+        <h2>Static list: (should always have items)</h2>
+        <ol>
+            {{ foreach: staticlist = item <}}
+            <ul>{{ :item }} </ul>
+            {{ > /for }}
+        </ol>
+
+        <h2>Dynamic list:</h2>
+        {{ foreach: staticlist = item }}
+            <ul>
+                {{* < *}}
+                    <li>{{ :item }} </li>
+                {{* > *}}
+            </ul>
+        {{* forelse *}}
+            <b>No List items</b>
+        {{ /for }}
+
+        {{*
+            Test block {{ fuckmeh }}
+        *}}
+    </div>
+
+</body>
+</html>
