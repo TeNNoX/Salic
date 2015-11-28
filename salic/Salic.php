@@ -16,6 +16,7 @@ class Salic
     protected $twig;
 
     protected $baseTemplate;
+    protected $baseUrl;
 
     /**
      * Salic constructor.
@@ -23,6 +24,7 @@ class Salic
     public function __construct()
     {
         $this->baseTemplate = 'base.html.twig';
+        $this->baseUrl = 'index.php';
     }
 
     public function init()
@@ -45,12 +47,16 @@ class Salic
             'page2' => array('name' => "Page 2", 'template' => "headline_with_text"),
             'page3' => array('name' => "Page 3"),
         );
-        Utils::generatePageHrefs($this->pages); // generates the href values
+        Utils::generatePageHrefs($this->pages, $this->baseUrl); // generates the href values
 
         $this->contents = array(
             'home' => "<p>This is some <i>Test Content</i> for the main page.</p>",
             'page2' => "<p>This is some <b>extra spicy</b> <i>Test Content</i> for the second page.</p>",
-            'page3' => "<b>No template used for this one</b><br><h2>So... here's a list for you</h2><ul><li>Test 1</li><li>Test 2</li></ul><i>we don't have ice anymore, so you have to be content with that. :/</i>",
+            'page3' => "<b>No template used for this one</b><br>
+                        <h2>Here's a list for you</h2>
+                        <ul><li>Test 1</li><li>Test 2</li></ul><br><br>
+                        <i>we don't have ice anymore, so, take this:</i><br>
+                        <a href='http://www.sempervideo.de/downloads/cute-chick-with-hairy-pussy.jpg'>Cute Chick with hairy pussy</a>",
         );
     }
 
@@ -92,6 +98,15 @@ class Salic
 
 class SalicMng extends Salic
 {
+
+    /**
+     * SalicMng constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->baseUrl = "manage.php";
+    }
 
     protected function doRenderPage($templatefile, $vars)
     {

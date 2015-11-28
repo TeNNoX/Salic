@@ -3,3 +3,16 @@
  * it should only be loaded when in manage mode
  **/
 
+var Salic = (function() {
+
+    var currentModal = null;
+
+    return {
+
+    };
+})();
+
+
+$(function() {
+
+});
