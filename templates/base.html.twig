@@ -26,7 +26,8 @@
 <body>
 {% block body %}
 
-    {% include 'elements/navbar.html.twig' %}
+    {% use 'elements/navbar.html.twig' %}
+    {{ block('navbar') }}
 
     <div class="container">
         <div id="content" class="jumbotron">

@@ -1,0 +1,13 @@
+{
+    "home": {
+        "name": "Home",
+        "template": "with_pagename"
+    },
+    "page2": {
+        "name": "Page 2",
+        "template": "with_pagename"
+    },
+    "page3": {
+        "name": "Page 3"
+    }
+}

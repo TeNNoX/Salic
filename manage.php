@@ -4,7 +4,7 @@ namespace salic;
 require_once('salic/Salic.php');
 
 $salic = new SalicMng();
-$salic->init();
+$salic->initAll();
 
 $pagekey = isset($_GET['page']) ? @$_GET['page'] : 'home';
 

@@ -9,13 +9,18 @@ require_once('Utils.php');
 
 /**
  * Simple And Light Cms
+ * Simple Agile Light Cms
+ * Simple And Live Cms
+ * Stupid -||-
+ *
+ * I could go on with this... :P
  */
 class Salic
 {
-    public $pages, $contents;
+    public $pages, $templates;
     protected $twig;
 
-    protected $baseTemplate;
+    protected $defaultTemplate;
     protected $baseUrl;
 
     /**
@@ -23,11 +28,29 @@ class Salic
      */
     public function __construct()
     {
-        $this->baseTemplate = 'base.html.twig';
+        $this->defaultTemplate = 'default.html.twig';
         $this->baseUrl = 'index.php';
     }
 
-    public function init()
+    public function initAll()
+    {
+        $this->loadTemplates();
+        $this->loadPages();
+        $this->initTwig();
+    }
+
+    public function loadTemplates()
+    {
+        $this->templates = json_decode(file_get_contents('data/templates.json'), true);
+    }
+
+    public function loadPages()
+    {
+        $this->pages = json_decode(file_get_contents('data/pages.json'), true);
+        Utils::generatePageHrefs($this->pages, $this->baseUrl); // generates the href values
+    }
+
+    public function initTwig()
     {
         $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../templates');
         $this->twig = new \Twig_Environment($loader, array(
@@ -36,29 +59,11 @@ class Salic
             'strict_variables' => true,
             'autoescape' => false,
         ));
-
-        $this->loadPages();
     }
 
-    private function loadPages()
-    {
-        $this->pages = array(
-            'home' => array('name' => "Home", 'template' => "headline_with_text"),
-            'page2' => array('name' => "Page 2", 'template' => "headline_with_text"),
-            'page3' => array('name' => "Page 3"),
-        );
-        Utils::generatePageHrefs($this->pages, $this->baseUrl); // generates the href values
-
-        $this->contents = array(
-            'home' => "<p>This is some <i>Test Content</i> for the main page.</p>",
-            'page2' => "<p>This is some <b>extra spicy</b> <i>Test Content</i> for the second page.</p>",
-            'page3' => "<b>No template used for this one</b><br>
-                        <h2>Here's a list for you</h2>
-                        <ul><li>Test 1</li><li>Test 2</li></ul><br><br>
-                        <i>we don't have ice anymore, so, take this:</i><br>
-                        <a href='http://www.sempervideo.de/downloads/cute-chick-with-hairy-pussy.jpg'>Cute Chick with hairy pussy</a>",
-        );
-    }
+    /*public function savePages() {
+        file_put_contents('pages.json', json_encode($this->pages, JSON_PRETTY_PRINT)); //TODO: disable prettyprint ?
+    }*/
 
     public function renderPage($pagekey)
     {
@@ -67,26 +72,54 @@ class Salic
             return;
         }
 
-        if (!array_key_exists($pagekey, $this->contents)) {
-            throw new ShouldNotHappenException("No content defined for page '$pagekey'");
+        $page = $this->pages[$pagekey];
+        $template = @$page['template'] ? $page['template'] . '.html.twig' : $this->defaultTemplate;
+        $content = $this->loadContent($pagekey); // loads the content variables for the page
+
+        $this->doRenderPage($template, array_merge(array(
+            'pages' => $this->pages,
+            'title' => 'SALiC Test page', //TODO: adapt page titles
+            'pagekey' => $pagekey,
+            'pagename' => $page['name'],
+        ), $content));
+    }
+
+    public function loadContent($pagekey) //TODO: load and save content
+    {
+        if (!is_dir("data/$pagekey")) {
+            throw new \Exception("No data for page '$pagekey'");
         }
 
-        $page = $this->pages[$pagekey];
-        $template = @$page['template'] ? $page['template'] . '.html.twig' : $this->baseTemplate;
-        $this->doRenderPage($template, array(
-            'pages' => $this->pages,
-            'title' => 'SALiC Test page',
-            'headline' => $page['name'],
-            'content' => $this->contents[$pagekey],
-        ));
+        $data = array();
+        // read all XXX.txt files in the page's directory to the array as data[XXX] = <content>
+        if ($handle = opendir("data/$pagekey")) {
+            /* This is the correct way to loop over the directory. (says phpdoc) */
+            while (false !== ($entry = readdir($handle))) {
+                $fileinfo = pathinfo($entry);
+
+                if ($fileinfo['extension'] == "txt") { // if this is a .txt file
+                    $val = file_get_contents("data/$pagekey/$entry");
+                    $fieldname = $fileinfo['filename'];
+                    $data[$fieldname] = $val;
+                }
+            }
+
+            closedir($handle);
+        } else {
+            throw new \Exception("Failed to read directory 'data/$pagekey'");
+        }
+
+        return $data;
     }
 
     private function render404()
     {
-        $this->doRenderPage($this->baseTemplate, array(
+        $this->doRenderPage($this->defaultTemplate, array(
             'pages' => $this->pages,
             'title' => 'Error 404',
-            'content' => "<h1>Error 404 - Page not Found</h1>Sorry, but the page you are looking for doesn't exist!<br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
+            'pagename' => 'Error 404', //TODO: handle this when saving from editor
+            'pagekey' => '%404',
+            'content' => "<h1>Error 404 - Page not Found</h1><p>Sorry, but the page you are looking for doesn't exist!</p><br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
         ));
     }
 
@@ -94,11 +127,27 @@ class Salic
     {
         echo $this->twig->render($templatefile, $vars);
     }
+
+    public function savePage($pagekey, array $regions)
+    {
+        foreach ($regions as $key => $val) {
+            if (!is_dir("data/$pagekey/")) {
+                if (!mkdir("data/$pagekey/", 0750, true)) { // rwxr-x---, TODO: configurable directory permissions
+                    throw new \Exception("Failed to create directory 'data/$pagekey/'");
+                }
+            }
+
+            $flag = file_put_contents("data/$pagekey/$key.txt", $val, LOCK_EX); // lock the file exclusively while writing
+            if ($flag === false) {
+                throw new \Exception("Failed to write file 'data/$pagekey/$key'");
+            }
+            //TODO: set file permissions
+        }
+    }
 }
 
 class SalicMng extends Salic
 {
-
     /**
      * SalicMng constructor.
      */

@@ -1,19 +1,31 @@
 {% extends parent_template %}
 
 {% block body %}
-    <div class="salic-manage-bar"> {# TODO: outsource manage bar? #}
+    {#<div class="salic-manage-bar"> {# TODO: remove manage bar? # }
         SALiC Manage Mode
-    </div>
+    </div>#}
 
     {{ parent() }}
 {% endblock %}
 
+{% block manage_mode_switch %}
+    <a class="navbar-brand" href="index.php?page={{ pagekey }}"><b>normal mode</b></a>
+{% endblock %}
+
 {% block scripts_top %}
     {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="../static/content-tools.min.css">
     <link rel="stylesheet" href="../static/manage.css">
 {% endblock %}
 
 {% block scripts_bottom %}
     {{ parent() }}
+    <script src="../static/content-tools.min.js"></script>
+    <script type="text/javascript">
+        // some info for the JS scripts
+        var salic_page_info = {
+            'pagekey': "{{ pagekey }}"
+        };
+    </script>
     <script type="text/javascript" src="../static/manage.js"></script>
 {% endblock %}
