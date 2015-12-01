@@ -6,13 +6,20 @@ namespace salic;
 class Utils
 {
     /*
-     * generate the href attribute for the pages
-     * (adds a 'href' => '...' to each page array)
+     * makes the pages array nice and consistent
+     * - generate 'href' attribute (baseUrl+pageKey)
+     * - set template to default tempalte if not specified
      */
-    public static function generatePageHrefs(array &$pages, $baseUrl)
+    public static function normalizePageArray(array &$pages, $baseUrl, $defaultTemplate)
     {
         foreach ($pages as $key => &$page) {
+            // generate href
             $page['href'] = $baseUrl . $key;
+
+            // set default template if not specified
+            if (!array_key_exists('template', $page)) {
+                $page['template'] = $defaultTemplate;
+            }
         }
     }
 

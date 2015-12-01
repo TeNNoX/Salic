@@ -6,8 +6,15 @@ require_once('Salic.php');
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 if(strpos($path, '/edit') === 0) {
-    $page = substr($path, 6);
+    $page = substr($path, 6); // remove the '/edit/'
     $salic = new SalicMng();
+
+
+    if(empty($page)) { // main edit page
+        $salic->initTwig();
+        $salic->renderBackend();
+        exit;
+    }
 
     if(strpos($page, '/save') !== false) {
         $salic->savePage(substr($page, 0, strlen($page)-5)); // remove the '/save'
