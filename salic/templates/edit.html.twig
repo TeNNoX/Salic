@@ -1,0 +1,24 @@
+{% extends parent_template %}
+
+
+{% block manage_mode_switch %}
+    <a class="navbar-brand" href="/{{ pagekey }}"><b>normal mode</b></a>
+{% endblock %}
+
+{% block scripts_top %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="/salic/static/content-tools.min.css">
+    <link rel="stylesheet" href="/salic/static/edit.css"> {# TODO: dynamic asset url #}
+{% endblock %}
+
+{% block scripts_bottom %}
+    {{ parent() }}
+    <script src="/salic/static/content-tools.min.js"></script>
+    <script type="text/javascript">
+        // some info for the JS scripts
+        var salic_page_info = {
+            'pagekey': "{{ pagekey }}"
+        };
+    </script>
+    <script type="text/javascript" src="/salic/static/edit.js"></script>
+{% endblock %}

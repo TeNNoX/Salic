@@ -8,35 +8,22 @@ require_once('Utils.php');
 
 
 /**
- * Simple And Light Cms
- * Simple Agile Light Cms
- * Simple And Live Cms
- * Stupid -||-
- *
- * I could go on with this... :P
+ * SaLiC = Sassy Little CMS
  */
 class Salic
 {
-    public $pages, $templates;
+    public $pages;
     protected $twig;
 
-    protected $defaultTemplate;
-    protected $baseUrl;
+    protected $defaultTemplate = 'default.html.twig';
+    protected $baseUrl = '/';
 
     /**
      * Salic constructor.
      */
     public function __construct()
     {
-        $this->defaultTemplate = 'default.html.twig';
-        $this->baseUrl = 'index.php';
-    }
-
-    public function initAll()
-    {
-        $this->loadTemplates();
         $this->loadPages();
-        $this->initTwig();
     }
 
     public function loadTemplates()
@@ -52,9 +39,11 @@ class Salic
 
     public function initTwig()
     {
-        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../templates');
+        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../templates');    // look into main templates first
+        $loader->addPath(__DIR__ . '/templates', 'salic');
+
         $this->twig = new \Twig_Environment($loader, array(
-            /*'cache' => __DIR__ . '/compilation_cache', */ //TODO: enable caching
+            /*'cache' => __DIR__ . '/compilation_cache', */ //TODO: enable twig caching
             'auto_reload' => true,
             'strict_variables' => true,
             'autoescape' => false,
@@ -84,7 +73,7 @@ class Salic
         ), $content));
     }
 
-    public function loadContent($pagekey) //TODO: load and save content
+    public function loadContent($pagekey)
     {
         if (!is_dir("data/$pagekey")) {
             throw new \Exception("No data for page '$pagekey'");
@@ -114,11 +103,12 @@ class Salic
 
     private function render404()
     {
+        http_response_code(404);
         $this->doRenderPage($this->defaultTemplate, array(
             'pages' => $this->pages,
             'title' => 'Error 404',
             'pagename' => 'Error 404', //TODO: handle this when saving from editor
-            'pagekey' => '%404',
+            'pagekey' => '404',
             'content' => "<h1>Error 404 - Page not Found</h1><p>Sorry, but the page you are looking for doesn't exist!</p><br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
         ));
     }
@@ -127,8 +117,40 @@ class Salic
     {
         echo $this->twig->render($templatefile, $vars);
     }
+}
 
-    public function savePage($pagekey, array $regions)
+class SalicMng extends Salic
+{
+    /**
+     * SalicMng constructor.
+     */
+    public function __construct()
+    {
+        $this->baseUrl = "/edit/";
+        parent::__construct();
+    }
+
+    protected function doRenderPage($templatefile, $vars)
+    {
+        $vars['parent_template'] = $templatefile;
+        parent::doRenderPage('@salic/edit.html.twig', $vars);
+    }
+
+    public function savePage($pagekey) {
+        if (!array_key_exists('regions', $_POST)) {
+            Utils::returnHttpError(400, "Error: missing regions in POST data");
+        }
+        $regions = $_POST['regions'];
+
+        if (!array_key_exists($pagekey, $this->pages)) {
+            //TODO: error handling
+            Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
+        }
+
+        $this->doSavePage($pagekey, $regions);
+    }
+
+    public function doSavePage($pagekey, array $regions)
     {
         foreach ($regions as $key => $val) {
             if (!is_dir("data/$pagekey/")) {
@@ -143,24 +165,6 @@ class Salic
             }
             //TODO: set file permissions
         }
-    }
-}
-
-class SalicMng extends Salic
-{
-    /**
-     * SalicMng constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->baseUrl = "manage.php";
-    }
-
-    protected function doRenderPage($templatefile, $vars)
-    {
-        $vars['parent_template'] = $templatefile;
-        parent::doRenderPage('manage.html.twig', $vars);
     }
 
 }

@@ -10,9 +10,9 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.php">SALiC</a> {# TODO: correct home href #}
+                <a class="navbar-brand" href="/">SALiC</a>
                 {% block manage_mode_switch %}
-                    <a class="navbar-brand" href="manage.php?page={{ pagekey }}"><b>manage mode</b></a>
+                    <a class="navbar-brand" href="/edit/{{ pagekey }}"><b>manage mode</b></a>
                 {% endblock %}
             </div>
 
@@ -20,7 +20,8 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     {% for key, page in pages %}
-                        <li><a id="ede-navbar-link-{{ key }}" href="{{ page.href }}">{{ page.name }}</a>
+                        <li>
+                            <a href="{{ page.href }}">{{ page.name }}</a>
                         </li> {# TODO: do we need the id tag for nav links? #}
                     {% endfor %}
                 </ul>

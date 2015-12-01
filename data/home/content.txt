@@ -1,6 +1,8 @@
 <p>
     This is some <i>Test Content</i> for the main page.
 </p>
+<h2>
+    SALiC rulez! ;)<br>
+</h2>
 <p>
-    FML
 </p>

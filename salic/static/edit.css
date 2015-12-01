@@ -1,0 +1,8 @@
+/**
+ * this file holds the css for the edit mode
+ * therefore, it should only be loaded when in edit mode
+ **/
+
+.ct-widget.ct-ignition {
+    top: 66px; /* TODO: configurable ct widget position */
+}

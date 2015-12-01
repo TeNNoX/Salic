@@ -12,7 +12,17 @@ class Utils
     public static function generatePageHrefs(array &$pages, $baseUrl)
     {
         foreach ($pages as $key => &$page) {
-            $page['href'] = "$baseUrl?page=$key";
+            $page['href'] = $baseUrl . $key;
         }
+    }
+
+    public static function returnHttpError($code, $msg = false)
+    {
+        http_response_code($code);
+
+        if ($msg)
+            die($msg);
+        else
+            die();
     }
 }
