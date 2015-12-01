@@ -63,10 +63,9 @@ class Salic
         }
 
         $page = $this->pages[$pagekey];
-        $template = @$page['template'] ? $page['template'] . '.html.twig' : $this->defaultTemplate;
         $content = $this->loadContent($pagekey); // loads the content variables for the page
 
-        $this->doRenderPage($template, array_merge(array(
+        $this->doRenderPage($page['template'], array_merge(array(
             'pages' => $this->pages,
             'title' => 'SALiC Test page', //TODO: adapt page titles
             'pagekey' => $pagekey,

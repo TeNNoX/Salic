@@ -19,7 +19,7 @@ class Utils
             // set default template if not specified
             if (!array_key_exists('template', $page)) {
                 $page['template'] = $defaultTemplate;
-            }
+            } //TODO: add extension if not given in pages.json ?
         }
     }
 
