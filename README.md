@@ -13,6 +13,7 @@ I want this CMS to be the following:
 - **simplistic**
 - **fast** (I'm developing on a Raspberry Pi)
 - as **easy and straight-forward** as possible for content editors (That's why ContentTools is perfect for it)
+- working without extra software (only PHP and composer libraries)
 
 It is designed mostly for simple websites (navigation and content). But will also be flexible for mildly complex pages.
 I will probably also add possibilities to extend it with custom controllers/widgets/page elements.
