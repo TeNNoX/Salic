@@ -40,8 +40,8 @@ class Salic
 
     public function initTwig()
     {
-        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../templates');    // look into main templates first
-        $loader->addPath(__DIR__ . '/templates', 'salic');
+        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../template');    // look into main templates first
+        $loader->addPath(__DIR__ . '/template', 'salic');
 
         $this->twig = new \Twig_Environment($loader, array(
             /*'cache' => __DIR__ . '/compilation_cache', */ //TODO: enable twig caching
