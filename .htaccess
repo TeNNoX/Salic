@@ -1,7 +1,7 @@
-
 ## Send everything to the index.php ##
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
-  RewriteRule !\.(js|ico|gif|jpg|png|css|woff)$ index.php
+  RewriteRule ^static/(.+)$ site/static/$1 [END]
+  RewriteRule .* index.php [L]
 </IfModule>

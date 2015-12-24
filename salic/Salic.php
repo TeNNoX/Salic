@@ -29,18 +29,18 @@ class Salic
 
     public function loadTemplates()
     {
-        $this->templates = json_decode(file_get_contents('data/templates.json'), true);
+        $this->templates = json_decode(file_get_contents('site/templates.json'), true);
     }
 
     public function loadPages()
     {
-        $this->pages = json_decode(file_get_contents('data/pages.json'), true);
+        $this->pages = json_decode(file_get_contents('site/pages.json'), true);
         Utils::normalizePageArray($this->pages, $this->baseUrl, $this->defaultTemplate); // generates the href values
     }
 
     public function initTwig()
     {
-        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../template');    // look into main templates first
+        $loader = new \Twig_Loader_Filesystem('site/template');    // look into main templates first
         $loader->addPath(__DIR__ . '/template', 'salic');
 
         $this->twig = new \Twig_Environment($loader, array(
@@ -75,19 +75,19 @@ class Salic
 
     public function loadContent($pagekey)
     {
-        if (!is_dir("data/$pagekey")) {
+        if (!is_dir("site/data/$pagekey")) {
             throw new \Exception("No data for page '$pagekey'");
         }
 
         $data = array();
         // read all XXX.txt files in the page's directory to the array as data[XXX] = <content>
-        if ($handle = opendir("data/$pagekey")) {
+        if ($handle = opendir("site/data/$pagekey")) {
             /* This is the correct way to loop over the directory. (says phpdoc) */
             while (false !== ($entry = readdir($handle))) {
                 $fileinfo = pathinfo($entry);
 
                 if ($fileinfo['extension'] == "txt") { // if this is a .txt file
-                    $val = file_get_contents("data/$pagekey/$entry");
+                    $val = file_get_contents("site/data/$pagekey/$entry");
                     $fieldname = $fileinfo['filename'];
                     $data[$fieldname] = $val;
                 }
@@ -109,7 +109,7 @@ class Salic
             'title' => 'Error 404',
             'pagename' => 'Error 404', //TODO: handle this when saving from editor
             'pagekey' => '404',
-            'content' => "<h1>Error 404 - Page not Found</h1><p>Sorry, but the page you are looking for doesn't exist!</p><br><a href='index.php'>Go to Homepage</a>", //TODO: customizable 404
+            'content' => "<h1>Error 404 - Page not Found</h1><p>Sorry, but the page you are looking for doesn't exist!</p><br><a href='/'>Go to Homepage</a>", //TODO: customizable 404
         ));
     }
 
