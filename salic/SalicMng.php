@@ -12,7 +12,7 @@ class SalicMng extends Salic
     public function __construct()
     {
         $this->baseUrl = "/edit/";
-        parent::__construct();
+        $this->loadPages();
     }
 
     public function renderBackend()
@@ -53,9 +53,9 @@ class SalicMng extends Salic
                 }
             }
 
-            $flag = file_put_contents($page_dir.$key.".txt", $val, LOCK_EX); // lock the file exclusively while writing
+            $flag = file_put_contents($page_dir . $key . $this->dataFileExtension, $val, LOCK_EX); // lock the file exclusively while writing
             if ($flag === false) {
-                throw new \Exception("Failed to write file '$page_dir$key.txt'");
+                throw new \Exception("Failed to write file '$page_dir$key" . $this->dataFileExtension . "'");
             }
             //TODO: set file permissions
         }

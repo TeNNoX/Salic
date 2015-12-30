@@ -13,11 +13,13 @@ require_once('SalicMng.php');
  */
 class Salic
 {
-    public $pages;
+    public $pages, $templates;
     protected $twig;
 
-    protected $defaultTemplate = 'default.html.twig';
+    protected $defaultTemplate = 'default';
+    protected $errorTemplate = '@salic/error.html.twig';
     protected $baseUrl = '/';
+    protected $dataFileExtension = '.html';
 
     /**
      * Salic constructor.
@@ -29,7 +31,8 @@ class Salic
 
     public function loadTemplates()
     {
-        $this->templates = json_decode(file_get_contents('site/templates.json'), true);
+        if (!isset($this->templates)) // only if not already loaded
+            $this->templates = json_decode(file_get_contents('site/templates.json'), true);
     }
 
     public function loadPages()
@@ -51,54 +54,49 @@ class Salic
         ));
     }
 
-    /*public function savePages() {
-        file_put_contents('pages.json', json_encode($this->pages, JSON_PRETTY_PRINT)); //TODO: disable prettyprint ?
-    }*/
-
     public function renderPage($pagekey)
     {
-        if (!array_key_exists($pagekey, $this->pages)) { // when querying an invalid page, go back to home TODO: 404 page
-            $this->render404();
-            return;
-        }
-
-        $page = $this->pages[$pagekey];
-        $content = $this->loadContent($pagekey); // loads the content variables for the page
-
-        $this->doRenderPage($page['template'], array_merge(array(
-            'pages' => $this->pages,
-            'title' => 'SALiC Test page', //TODO: adapt page titles
-            'pagekey' => $pagekey,
-            'pagename' => $page['name'],
-        ), $content));
-    }
-
-    public function loadContent($pagekey)
-    {
-        if (!is_dir("site/data/$pagekey")) {
-            throw new \Exception("No data for page '$pagekey'");
-        }
-
-        $data = array();
-        // read all XXX.txt files in the page's directory to the array as data[XXX] = <content>
-        if ($handle = opendir("site/data/$pagekey")) {
-            /* This is the correct way to loop over the directory. (says phpdoc) */
-            while (false !== ($entry = readdir($handle))) {
-                $fileinfo = pathinfo($entry);
-
-                if ($fileinfo['extension'] == "txt") { // if this is a .txt file
-                    $val = file_get_contents("site/data/$pagekey/$entry");
-                    $fieldname = $fileinfo['filename'];
-                    $data[$fieldname] = $val;
-                }
+        try {
+            if (!array_key_exists($pagekey, $this->pages)) { // when querying an invalid page, go back to home TODO: 404 page
+                $this->render404();
+                return;
             }
 
-            closedir($handle);
-        } else {
-            throw new \Exception("Failed to read directory 'data/$pagekey'");
+            $page = $this->pages[$pagekey];
+
+            $this->loadTemplates();
+            $template_key = $page['template'];
+            $template = $this->templates[$template_key];
+            $fields = array();
+            foreach ($template['fields'] as $field) {
+                $data = $this->loadField($field, $pagekey); // loads the data for the field
+                $fields[$field] = $data;
+            }
+
+            $this->doRenderPage($template['file'], array(
+                'pages' => $this->pages,
+                'title' => 'SALiC Test page', //TODO: adapt page titles
+                'pagekey' => $pagekey,
+                'pagename' => $page['name'],
+                'fields' => $fields
+            ));
+        } catch (\Exception $e) {
+            $this->renderError($e);
+        }
+    }
+
+    public function loadField($field, $pagekey)
+    {
+        if (!is_dir("site/data/$pagekey")) {
+            throw new SalicException("No data for page '$pagekey'");
         }
 
-        return $data;
+        $file = "site/data/$pagekey/$field".$this->dataFileExtension;
+        if(!is_file($file)) {
+            //throw new SalicException("No data for field '$field' on page '$pagekey'"); TODO: notify webmaster on missing variable
+            return null;
+        }
+        return file_get_contents($file);
     }
 
     private function render404()
@@ -110,6 +108,14 @@ class Salic
             'pagename' => 'Error 404', //TODO: handle this when saving from editor
             'pagekey' => '404',
             'content' => "<h1>Error 404 - Page not Found</h1><p>Sorry, but the page you are looking for doesn't exist!</p><br><a href='/'>Go to Homepage</a>", //TODO: customizable 404
+        ));
+    }
+
+    private function renderError(\Exception $e)
+    {
+        http_response_code(500);
+        $this->doRenderPage($this->errorTemplate, array(
+            'exception' => $e
         ));
     }
 

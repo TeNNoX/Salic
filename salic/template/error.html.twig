@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SaLiC Error</title>
+</head>
+<body>
+
+<div>
+    <h1>I'm sorry, but I had a problem while trying to render the page :/</h1>
+
+    If you are not the Webmaster,<br>
+    <a href="/" style="font-size: 1.5em;"> &gt; return to the homepage &lt;</a>. <br>
+    Please come back later.
+
+    <br><br><br>
+    <br><br><br>
+    <br><br><br>
+    <hr>
+
+    <h3>Webmaster info:</h3>
+
+    Error: {{ exception.getMessage() }}
+    <br> <br>
+    Trace:
+    <pre>{{ exception.getTraceAsString() }}</pre>
+</div>
+</body>
+</html>
