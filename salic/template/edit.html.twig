@@ -5,13 +5,13 @@
     <a class="navbar-brand" href="/{{ pagekey }}"><b>normal mode</b></a>
 {% endblock %}
 
-{% block scripts_top %}
+{% block css_scripts %}
     {{ parent() }}
     <link rel="stylesheet" type="text/css" href="/salic/static/content-tools.min.css">
     <link rel="stylesheet" href="/salic/static/edit.css"> {# TODO: dynamic asset url #}
 {% endblock %}
 
-{% block scripts_bottom %}
+{% block js_scripts %}
     {{ parent() }}
     <script src="/salic/static/content-tools.min.js"></script>
     <script type="text/javascript">

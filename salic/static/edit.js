@@ -4,9 +4,7 @@
  **/
 
 $(function () {
-    var editor;
-
-    editor = ContentTools.EditorApp.get();
+    var editor = ContentTools.EditorApp.get();
     editor.init('*[data-salic-name]', 'data-salic-name');
 
     editor.bind('save', function (regions) {
