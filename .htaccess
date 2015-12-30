@@ -2,6 +2,16 @@
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
+  # /static/...
   RewriteRule ^static/(.+)$ site/static/$1 [END]
-  RewriteRule .* index.php [L]
+  # /salic/static/...
+  RewriteRule ^salic/static/(.+)$ salic/static/$1 [END]
+
+  # /edit/XYZ/save
+  RewriteRule ^edit/([^/]*)/save/? save.php?page=$1 [END,QSD]
+  # /edit/XYZ[/]
+  RewriteRule ^edit/([^/]*)/? edit.php?page=$1 [END,QSD] # discard other GET params
+
+  # /XYZ
+  RewriteRule ^([^/]*) index.php?page=$1 [END,QSD] # for now, ignore everything after an additional slash (like /page/blablub)
 </IfModule>

@@ -46,15 +46,16 @@ class SalicMng extends Salic
     public function doSavePage($pagekey, array $regions)
     {
         foreach ($regions as $key => $val) {
-            if (!is_dir("data/$pagekey/")) {
-                if (!mkdir("data/$pagekey/", 0750, true)) { // rwxr-x---, TODO: configurable directory permissions
-                    throw new \Exception("Failed to create directory 'data/$pagekey/'");
+            $page_dir = "site/data/$pagekey/";
+            if (!is_dir($page_dir)) {
+                if (!mkdir($page_dir, 0750, true)) { // rwxr-x---, TODO: configurable directory permissions
+                    throw new \Exception("Failed to create directory '$page_dir'");
                 }
             }
 
-            $flag = file_put_contents("data/$pagekey/$key.txt", $val, LOCK_EX); // lock the file exclusively while writing
+            $flag = file_put_contents($page_dir.$key.".txt", $val, LOCK_EX); // lock the file exclusively while writing
             if ($flag === false) {
-                throw new \Exception("Failed to write file 'data/$pagekey/$key'");
+                throw new \Exception("Failed to write file '$page_dir$key.txt'");
             }
             //TODO: set file permissions
         }
