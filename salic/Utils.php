@@ -32,4 +32,13 @@ class Utils
         else
             die();
     }
+
+    public static function removeHiddenPages($pages)
+    {
+        foreach ($pages as $key => $page) {
+            if (array_key_exists('hidden', $page) && $page['hidden'] == true)
+                unset($pages[$key]);
+        }
+        return $pages;
+    }
 }

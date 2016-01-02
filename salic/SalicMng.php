@@ -35,7 +35,7 @@ class SalicMng extends Salic
         }
         $regions = $_POST['regions'];
 
-        if (!array_key_exists($pagekey, $this->pages)) {
+        if ($pagekey !== '404' && !array_key_exists($pagekey, $this->pages)) {
             //TODO: error handling
             Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
         }

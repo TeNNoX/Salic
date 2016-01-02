@@ -17,6 +17,7 @@ class Salic
     protected $twig;
 
     protected $defaultTemplate = 'default';
+    protected $template404 = '404.html.twig';
     protected $errorTemplate = '@salic/error.html.twig';
     protected $baseUrl = '/';
     protected $dataFileExtension = '.html';
@@ -62,10 +63,13 @@ class Salic
                 return;
             }
 
-            $page = $this->pages[$pagekey];
-
+            // load template and field data
             $this->loadTemplates();
+            $page = $this->pages[$pagekey];
             $template_key = $page['template'];
+            if (!array_key_exists($template_key, $this->templates)) {
+                throw new SalicException("Template '$template_key' not found in templates.json");
+            }
             $template = $this->templates[$template_key];
             $fields = array();
             foreach ($template['fields'] as $field) {
@@ -74,7 +78,7 @@ class Salic
             }
 
             $this->doRenderPage($template['file'], array(
-                'pages' => $this->pages,
+                'nav_pages' => Utils::removeHiddenPages($this->pages),
                 'title' => 'SALiC Test page', //TODO: adapt page titles
                 'pagekey' => $pagekey,
                 'pagename' => $page['name'],
@@ -88,11 +92,12 @@ class Salic
     public function loadField($field, $pagekey)
     {
         if (!is_dir("site/data/$pagekey")) {
-            throw new SalicException("No data for page '$pagekey'");
+            //throw new SalicException("No data for page '$pagekey'");
+            return null;
         }
 
-        $file = "site/data/$pagekey/$field".$this->dataFileExtension;
-        if(!is_file($file)) {
+        $file = "site/data/$pagekey/$field" . $this->dataFileExtension;
+        if (!is_file($file)) {
             //throw new SalicException("No data for field '$field' on page '$pagekey'"); TODO: notify webmaster on missing variable
             return null;
         }
@@ -102,12 +107,18 @@ class Salic
     private function render404()
     {
         http_response_code(404);
-        $this->doRenderPage($this->defaultTemplate, array(
-            'pages' => $this->pages,
-            'title' => 'Error 404',
-            'pagename' => 'Error 404', //TODO: handle this when saving from editor
+
+        $content = $this->loadField('main', '404');
+        if($content == null)
+            $content = "<p>The page you are looking for couldn't be found.<br><a href='/'>Go back to the homepage</a></p>"; // default
+
+        $this->doRenderPage($this->template404, array(
+            'nav_pages' => Utils::removeHiddenPages($this->pages),
+            'title' => 'Page not found',
+            'pagename' => 'Page not found', //TODO: handle this when saving from editor
             'pagekey' => '404',
-            'content' => "<h1>Error 404 - Page not Found</h1><p>Sorry, but the page you are looking for doesn't exist!</p><br><a href='/'>Go to Homepage</a>", //TODO: customizable 404
+            'headline' => "Error 404 - Page not Found",
+            'main' => $content,
         ));
     }
 
