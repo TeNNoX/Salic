@@ -9,7 +9,7 @@ if (empty($page)) {
     die('pagekey not given');
 }
 
-$salic->savePage($page); // remove the '/save'
-die("success");
+$salic->savePage($page);
+die("success"); // if not stopped by an exception, print out the good news
 
 ?>
