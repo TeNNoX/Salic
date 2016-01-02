@@ -7,6 +7,7 @@ $(function () {
     var editor = ContentTools.EditorApp.get();
     editor.init('*[data-salic-name]', 'data-salic-name');
 
+    // SAVING
     editor.bind('save', function (regions) {
         if ($.isEmptyObject(regions)) {
             return; // we don't need to save empty changes
