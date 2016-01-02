@@ -78,8 +78,6 @@ class Salic
             }
 
             $this->doRenderPage($template['file'], array(
-                'nav_pages' => Utils::removeHiddenPages($this->pages),
-                'title' => 'SALiC Test page', //TODO: adapt page titles
                 'pagekey' => $pagekey,
                 'pagename' => $page['name'],
                 'fields' => $fields
@@ -89,37 +87,40 @@ class Salic
         }
     }
 
-    public function loadField($field, $pagekey)
+    private function render404()
+    {
+        try {
+            http_response_code(404);
+
+            $fields = array();
+            $fields['bannertext'] = $this->loadField('bannertext', '404', "<h1>Page not found</h1>"); // default
+
+            $fields['main'] = $this->loadField('main', '404',
+                "<p>The page you are looking for couldn't be found.<br><a href='/'>Go back to the homepage</a></p>");
+
+            $this->doRenderPage($this->template404, array(
+                'pagekey' => '404',
+                'pagename' => '404',
+                'fields' => $fields
+            ));
+        } catch (\Exception $e) {
+            $this->renderError($e);
+        }
+    }
+
+    public function loadField($field, $pagekey, $default = null)
     {
         if (!is_dir("site/data/$pagekey")) {
             //throw new SalicException("No data for page '$pagekey'");
-            return null;
+            return $default;
         }
 
         $file = "site/data/$pagekey/$field" . $this->dataFileExtension;
         if (!is_file($file)) {
             //throw new SalicException("No data for field '$field' on page '$pagekey'"); TODO: notify webmaster on missing variable
-            return null;
+            return $default;
         }
         return file_get_contents($file);
-    }
-
-    private function render404()
-    {
-        http_response_code(404);
-
-        $content = $this->loadField('main', '404');
-        if($content == null)
-            $content = "<p>The page you are looking for couldn't be found.<br><a href='/'>Go back to the homepage</a></p>"; // default
-
-        $this->doRenderPage($this->template404, array(
-            'nav_pages' => Utils::removeHiddenPages($this->pages),
-            'title' => 'Page not found',
-            'pagename' => 'Page not found', //TODO: handle this when saving from editor
-            'pagekey' => '404',
-            'headline' => "Error 404 - Page not Found",
-            'main' => $content,
-        ));
     }
 
     private function renderError(\Exception $e)
@@ -132,6 +133,7 @@ class Salic
 
     protected function doRenderPage($templatefile, $vars)
     {
+        $vars['nav_pages'] = Utils::removeHiddenPages($this->pages);
         echo $this->twig->render($templatefile, $vars);
     }
 }
