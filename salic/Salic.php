@@ -7,7 +7,6 @@ require_once('Exceptions.php');
 require_once('Utils.php');
 require_once('SalicMng.php');
 
-
 /**
  * SaLiC = Sassy Little CMS
  */
@@ -22,11 +21,15 @@ class Salic
     protected $baseUrl = '/';
     protected $dataFileExtension = '.html';
 
+    protected $current_lang;
+
     /**
      * Salic constructor.
      */
-    public function __construct()
+    public function __construct($lang)
     {
+        $this->current_lang = $lang;
+        $this->baseUrl = '/$lang/';
         $this->loadPages();
     }
 
@@ -115,7 +118,7 @@ class Salic
             return $default;
         }
 
-        $file = "site/data/$pagekey/$field" . $this->dataFileExtension;
+        $file = "site/data/$pagekey/$field" . "_" . $this->current_lang . $this->dataFileExtension;
         if (!is_file($file)) {
             //throw new SalicException("No data for field '$field' on page '$pagekey'"); TODO: notify webmaster on missing variable
             return $default;

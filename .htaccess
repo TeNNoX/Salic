@@ -12,6 +12,8 @@
   # /edit/XYZ[/]
   RewriteRule ^edit/([^/]*)/? edit.php?page=$1 [END,QSD] # discard other GET params
 
+  # /en/XYZ
+  RewriteRule ^([A-z]+)/([^/]*) index.php?lang=$1&page=$2 [END,QSD]
   # /XYZ
   RewriteRule ^([^/]*) index.php?page=$1 [END,QSD] # for now, ignore everything after an additional slash (like /page/blablub)
 </IfModule>

@@ -11,7 +11,7 @@ class SalicMng extends Salic
      */
     public function __construct()
     {
-        $this->baseUrl = "/edit/";
+        $this->baseUrl = "/" . $this->lang . "/edit/";
         $this->loadPages();
     }
 

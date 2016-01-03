@@ -2,13 +2,37 @@
 
 namespace salic;
 
+require_once 'Settings.php';
 
 class Utils
 {
-    /*
+
+    /**
+     * Parse the accepted languages from the HTTP Header, and return the preferred one, if available, otherwise the default.
+     *
+     * @param array $lang_settings - if already loaded
+     * @return string
+     */
+    public static function getDefaultLanguageFromHeader($lang_settings = null)
+    {
+        if ($lang_settings == null)
+            $lang_settings = Settings::getLangSettings();
+
+        $default = $lang_settings['default'];
+        $available = array_keys($lang_settings['available']);
+
+        require_once 'LanguageDetection.php';
+        return getDefaultLanguage($available, $default);
+    }
+
+    /**
      * makes the pages array nice and consistent
      * - generate 'href' attribute (baseUrl+pageKey)
      * - set template to default tempalte if not specified
+     *
+     * @param array $pages
+     * @param $baseUrl
+     * @param $defaultTemplate
      */
     public static function normalizePageArray(array &$pages, $baseUrl, $defaultTemplate)
     {
