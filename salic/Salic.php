@@ -141,6 +141,7 @@ class Salic
         $vars['baseurl'] = $this->baseUrl;
         $vars['baseurl_international'] = $this->baseUrlInternational;
         $vars['nav_pages'] = Utils::removeHiddenPages($this->getPageSettings()['available']);
+        $vars['language'] = $this->current_lang;
         $vars['languages'] = Settings::getLangSettings()['available'];
         $vars['default_page'] = $this->getPageSettings()['default'];
         echo $this->twig->render($templatefile, $vars);
