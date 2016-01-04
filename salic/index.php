@@ -3,7 +3,7 @@ namespace salic;
 require_once('Salic.php');
 
 
-$page = $_GET['page'];
+$page = strtolower($_GET['page']);
 
 // LANGUAGE SELECTION
 $lang_settings = Settings::getLangSettings();

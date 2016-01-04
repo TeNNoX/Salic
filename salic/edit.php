@@ -2,7 +2,7 @@
 namespace salic;
 require_once('Salic.php');
 
-$page = $_GET['page'];
+$page = strtolower($_GET['page']);
 $salic = new SalicMng();
 $salic->initTwig();
 
