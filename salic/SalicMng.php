@@ -55,7 +55,8 @@ class SalicMng extends Salic
                 }
             }
 
-            $flag = file_put_contents($page_dir . $key . $this->dataFileExtension, $val, LOCK_EX); // lock the file exclusively while writing
+            $filename = $key . "_" . $this->current_lang . $this->dataFileExtension; // save as 'pagekey_lang.ext'
+            $flag = file_put_contents($page_dir . $filename, $val, LOCK_EX); // lock the file exclusively while writing
             if ($flag === false) {
                 throw new \Exception("Failed to write file '$page_dir$key" . $this->dataFileExtension . "'");
             }
