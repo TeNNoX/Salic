@@ -22,8 +22,7 @@ $salic->initTwig();
 
 $page = strtolower($_GET['page']);
 if (!$page) { // default page
-    reset($salic->pages); // reset array pointer, to be safe
-    $page = key($salic->pages); // just use the first page as the default page, TODO: configurable default page?
+    $page = $salic->getPageSettings()['default'];
 }
 
 $salic->renderPage($page);

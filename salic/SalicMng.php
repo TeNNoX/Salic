@@ -15,13 +15,12 @@ class SalicMng extends Salic
         $this->current_lang = $lang;
         $this->baseUrlInternational = '/edit/';
         $this->baseUrl = $this->baseUrlInternational . "$lang/";
-        $this->loadPages();
     }
 
     public function renderBackend()
     {
         $this->doRenderPage($this->mainEditTemplate, array(
-            'pages' => $this->pages,
+            'pages' => $this->getPageSettings()['available'],
         ));
     }
 
@@ -38,7 +37,7 @@ class SalicMng extends Salic
         }
         $regions = $_POST['regions'];
 
-        if ($pagekey !== '404' && !array_key_exists($pagekey, $this->pages)) {
+        if ($pagekey !== '404' && !array_key_exists($pagekey, $this->getPageSettings()['available'])) {
             //TODO: error handling
             Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
         }
