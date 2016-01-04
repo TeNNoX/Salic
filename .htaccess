@@ -7,13 +7,15 @@
   # /salic/static/...
   RewriteRule ^salic/static/(.+)$ salic/static/$1 [END]
 
-  # /edit/XYZ/save
-  RewriteRule ^edit/([^/]*)/save/? save.php?page=$1 [END,QSD]
+  # /edit/lang/XYZ/save
+  RewriteRule ^edit/([A-z]+)/([^/]*)/save/? save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
+  # /edit/lang/XYZ[/]
+  RewriteRule ^edit/([A-z]+)/([^/]*)/? edit.php?lang=$1&page=$2 [END,QSD]
   # /edit/XYZ[/]
-  RewriteRule ^edit/([^/]*)/? edit.php?page=$1 [END,QSD] # discard other GET params
+  RewriteRule ^edit/([^/]*)/? edit.php?lang=en&page=$2 [END,QSD] # select default language
 
   # /en/XYZ
-  RewriteRule ^([A-z]+)/([^/]*) index.php?lang=$1&page=$2 [END,QSD]
+  RewriteRule ^([A-z]+)/([^/]*)/? index.php?lang=$1&page=$2 [END,QSD]
   # /XYZ
-  RewriteRule ^([^/]*) index.php?page=$1 [END,QSD] # for now, ignore everything after an additional slash (like /page/blablub)
+  RewriteRule ^([^/]*)/? index.php?page=$1 [END,QSD] # for now, ignore everything after an additional slash (like /page/blablub)
 </IfModule>

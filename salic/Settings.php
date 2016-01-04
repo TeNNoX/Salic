@@ -3,15 +3,18 @@ namespace salic;
 
 class Settings
 {
+    protected static $baseDir = 'site/';
+
     private static $lang_settings;
+    private static $page_settings;
 
     public static function getLangSettings()
     {
-        if(isset(self::$lang_settings)) // cache for this request
+        if (isset(self::$lang_settings)) // cache for this request
             return self::$lang_settings;
 
         $file = 'languages.json';
-        $json = self::parse('site/' . $file);
+        $json = self::parse(self::$baseDir . $file);
         self::assertArray('available', $json, $file);
 
         $keys = array_keys($json['available']);
@@ -22,6 +25,28 @@ class Settings
         }
 
         self::assertString('default', $json, $file);
+        return $json;
+    }
+
+    public static function getPageSettings($baseUrl, $defaultTemplate)
+    {
+        if (isset(self::$page_settings)) // cache for this request
+            return self::$page_settings;
+
+        $file = 'pages.json';
+        $json = self::parse(self::$baseDir . $file);
+        self::assertArray('available', $json, $file);
+
+        $keys = array_keys($json['available']);
+        if (!array_key_exists('default', $json)) {
+            $json['default'] = array_shift($keys); // select first page as default
+        } else if (!in_array($json['default'], $keys)) {
+            throw new SalicSettingsException("default page '" . $json['default'] . "' is not listed in 'availiable (in '$file')");
+        }
+
+        self::assertString('default', $json, $file);
+
+        Utils::normalizePageArray($json['available'], $baseUrl, $defaultTemplate);
         return $json;
     }
 

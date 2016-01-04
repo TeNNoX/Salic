@@ -8,10 +8,13 @@ class SalicMng extends Salic
 
     /**
      * SalicMng constructor.
+     * @param $lang the language for this request
      */
-    public function __construct()
+    public function __construct($lang)
     {
-        $this->baseUrl = "/" . $this->lang . "/edit/";
+        $this->current_lang = $lang;
+        $this->baseUrlInternational = '/edit/';
+        $this->baseUrl = $this->baseUrlInternational . "$lang/";
         $this->loadPages();
     }
 

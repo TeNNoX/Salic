@@ -12,25 +12,27 @@ require_once('SalicMng.php');
  */
 class Salic
 {
-    public $pages, $templates;
+    public $templates;
     protected $twig;
 
     protected $defaultTemplate = 'default';
     protected $template404 = '404.html.twig';
     protected $errorTemplate = '@salic/error.html.twig';
-    protected $baseUrl = '/';
+    protected $baseUrl;
+    protected $baseUrlInternational = '/';
     protected $dataFileExtension = '.html';
 
     protected $current_lang;
 
     /**
      * Salic constructor.
+     * @param $lang string the language for this request
      */
     public function __construct($lang)
     {
         $this->current_lang = $lang;
-        $this->baseUrl = '/$lang/';
-        $this->loadPages();
+        $this->baseUrlInternational = '/';
+        $this->baseUrl = $this->baseUrlInternational . "$lang/";
     }
 
     public function loadTemplates()
@@ -39,10 +41,9 @@ class Salic
             $this->templates = json_decode(file_get_contents('site/templates.json'), true);
     }
 
-    public function loadPages()
+    public function getPageSettings()
     {
-        $this->pages = json_decode(file_get_contents('site/pages.json'), true);
-        Utils::normalizePageArray($this->pages, $this->baseUrl, $this->defaultTemplate); // generates the href values
+        return Settings::getPageSettings($this->baseUrl, $this->defaultTemplate); // for generation of href values
     }
 
     public function initTwig()
@@ -61,14 +62,15 @@ class Salic
     public function renderPage($pagekey)
     {
         try {
-            if (!array_key_exists($pagekey, $this->pages)) { // when querying an invalid page, go back to home TODO: 404 page
+            $pages = $this->getPageSettings()['available'];
+            if (!array_key_exists($pagekey, $pages)) { // when querying an invalid page, go back to home TODO: 404 page
                 $this->render404();
                 return;
             }
 
             // load template and field data
             $this->loadTemplates();
-            $page = $this->pages[$pagekey];
+            $page = $pages[$pagekey];
             $template_key = $page['template'];
             if (!array_key_exists($template_key, $this->templates)) {
                 throw new SalicException("Template '$template_key' not found in templates.json");
@@ -136,8 +138,11 @@ class Salic
 
     protected function doRenderPage($templatefile, $vars)
     {
-        $vars['nav_pages'] = Utils::removeHiddenPages($this->pages);
+        $vars['baseurl'] = $this->baseUrl;
+        $vars['baseurl_international'] = $this->baseUrlInternational;
+        $vars['nav_pages'] = Utils::removeHiddenPages($this->getPageSettings()['available']);
         $vars['languages'] = Settings::getLangSettings()['available'];
+        $vars['default_page'] = $this->getPageSettings()['default'];
         echo $this->twig->render($templatefile, $vars);
     }
 }

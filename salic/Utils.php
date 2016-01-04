@@ -34,7 +34,6 @@ class Utils
      */
     public static function normalizePageArray(array &$pages, $baseUrl, $defaultTemplate)
     {
-        array_values($pages)[0]['is_default'] = true;
         foreach ($pages as $key => &$page) {
             // generate href
             $page['href'] = $baseUrl . $key;
@@ -42,7 +41,7 @@ class Utils
             // set default template if not specified
             if (!array_key_exists('template', $page)) {
                 $page['template'] = $defaultTemplate;
-            } //TODO: add extension if not given in pages.json ?
+            }
         }
     }
 

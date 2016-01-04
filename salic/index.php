@@ -24,8 +24,7 @@ if (array_key_exists('lang', $_GET)) {
 $salic = new Salic($lang);
 
 if (empty($page)) {
-    reset($salic->pages); // reset array pointer, to be safe
-    $page = key($salic->pages); // just use the first page as the default page, TODO: configurable default page?
+    $page = $salic->getPageSettings()['default'];
 }
 
 $salic->initTwig();
