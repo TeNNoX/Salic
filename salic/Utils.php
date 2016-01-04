@@ -36,6 +36,7 @@ class Utils
      */
     public static function normalizePageArray(array &$pages, $baseUrl, $defaultTemplate)
     {
+        array_values($pages)[0]['is_default'] = true;
         foreach ($pages as $key => &$page) {
             // generate href
             $page['href'] = $baseUrl . $key;
