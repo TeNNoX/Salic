@@ -137,6 +137,7 @@ class Salic
     protected function doRenderPage($templatefile, $vars)
     {
         $vars['nav_pages'] = Utils::removeHiddenPages($this->pages);
+        $vars['languages'] = Settings::getLangSettings()['available'];
         echo $this->twig->render($templatefile, $vars);
     }
 }

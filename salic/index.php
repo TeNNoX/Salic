@@ -13,7 +13,7 @@ if (array_key_exists('lang', $_GET)) {
         echo "Invalid Language: $lang"; //TODO:
     }
 } else {
-    $lang = Utils::getDefaultLanguageFromHeader($lang_settings);
+    $lang = Utils::getDefaultLanguageFromHeader();
     if ($lang != $lang_settings['default']) { // if a better language is available, redirect to it
         echo "Redirect: <a href='/$lang/$page'>/$lang/$page</a>";
         http_response_code(303); //TODO: how to redirect properly for localisation

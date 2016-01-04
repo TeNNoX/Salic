@@ -10,13 +10,11 @@ class Utils
     /**
      * Parse the accepted languages from the HTTP Header, and return the preferred one, if available, otherwise the default.
      *
-     * @param array $lang_settings - if already loaded
      * @return string
      */
-    public static function getDefaultLanguageFromHeader($lang_settings = null)
+    public static function getDefaultLanguageFromHeader()
     {
-        if ($lang_settings == null)
-            $lang_settings = Settings::getLangSettings();
+        $lang_settings = Settings::getLangSettings();
 
         $default = $lang_settings['default'];
         $available = array_keys($lang_settings['available']);
