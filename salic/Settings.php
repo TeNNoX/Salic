@@ -3,9 +3,13 @@ namespace salic;
 
 class Settings
 {
+    private static $lang_settings;
 
     public static function getLangSettings()
     {
+        if(isset(self::$lang_settings)) // cache for this request
+            return self::$lang_settings;
+
         $file = 'languages.json';
         $json = self::parse('site/' . $file);
         self::assertArray('available', $json, $file);
