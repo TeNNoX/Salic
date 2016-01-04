@@ -16,7 +16,7 @@ if (array_key_exists('lang', $_GET)) {
 } else {
     $lang = Utils::getDefaultLanguageFromHeader();  // language is not given, redirect to the best one
     echo "Redirect: <a href='/$lang/$page'>/$lang/$page</a>";
-    http_response_code(303); //TODO: how to redirect properly for localisation
+    http_response_code(302); //TODO: how to redirect properly for localisation
     header("Location:/$lang/$page");
     exit;
 }
