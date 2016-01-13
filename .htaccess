@@ -2,6 +2,9 @@
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
+  # TESTS
+  RewriteRule ^tests/(.+)$ salic/tests/test_$1.php [END]
+
   # /static/...
   RewriteRule ^static/(.+)$ site/static/$1 [END]
   # /salic/static/...
