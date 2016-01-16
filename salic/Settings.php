@@ -56,9 +56,12 @@ class Settings
         if ($raw === false)
             throw new SalicSettingsException("Unable to read '$file'"); //TODO: default values when json files don't exist
 
+        // remove comments (source: https://secure.php.net/manual/en/function.json-decode.php#111551)
+        $raw = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t](//).*)#", '', $raw);
+
         $json = json_decode($raw, true);
-        if (!$json)
-            throw new SalicSettingsException("Unable to parse '$file'");
+        if (!$json || json_last_error() !== JSON_ERROR_NONE)
+            throw new SalicSettingsException("Unable to parse '$file': ".json_last_error_msg());
         return $json;
     }
 
