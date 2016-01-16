@@ -23,28 +23,6 @@ class Utils
         return getDefaultLanguage($available, $default);
     }
 
-    /**
-     * makes the pages array nice and consistent
-     * - generate 'href' attribute (baseUrl+pageKey)
-     * - set template to default tempalte if not specified
-     *
-     * @param array $pages
-     * @param $baseUrl
-     * @param $defaultTemplate
-     */
-    public static function normalizePageArray(array &$pages, $baseUrl, $defaultTemplate)
-    {
-        foreach ($pages as $key => &$page) {
-            // generate href
-            $page['href'] = $baseUrl . $key;
-
-            // set default template if not specified
-            if (!array_key_exists('template', $page)) {
-                $page['template'] = $defaultTemplate;
-            }
-        }
-    }
-
     public static function returnHttpError($code, $msg = false)
     {
         http_response_code($code);
@@ -55,12 +33,20 @@ class Utils
             die();
     }
 
-    public static function removeHiddenPages($pages)
+    public static function getNavPageList($pageSettings, $baseUrl) // = general page settings
     {
-        foreach ($pages as $key => $page) {
-            if (array_key_exists('hidden', $page) && $page['hidden'] == true)
-                unset($pages[$key]);
+        $nav_array = array();
+        $pages = $pageSettings['available'];
+        foreach ($pages as $key) {
+            if (array_key_exists($key, $pageSettings['hidden_in_nav']))
+                continue;
+
+            $title = Settings::getPageSettings($key)['title'];
+            $nav_array[$key] = array(
+                'title' => $title,
+                'href' => $baseUrl . $key,
+            );
         }
-        return $pages;
+        return $nav_array;
     }
 }

@@ -22,7 +22,7 @@ $salic->initTwig();
 
 $page = strtolower($_GET['page']);
 if (!$page) { // default page
-    $page = $salic->getPageSettings()['default'];
+    $page = Settings::getGeneralPageSettings()['default'];
 }
 
 $salic->renderPage($page);

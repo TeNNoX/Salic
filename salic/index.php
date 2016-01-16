@@ -24,7 +24,7 @@ if (array_key_exists('lang', $_GET)) {
 $salic = new Salic($lang);
 
 if (empty($page)) {
-    $page = $salic->getPageSettings()['default'];
+    $page = Settings::getGeneralPageSettings()['default'];
 }
 
 $salic->initTwig();

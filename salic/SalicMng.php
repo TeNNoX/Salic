@@ -4,6 +4,8 @@ namespace salic;
 
 class SalicMng extends Salic
 {
+    const baseUrlInternational = "/edit/";
+
     private $mainEditTemplate = '@salic/backend.html.twig';
 
     /**
@@ -12,7 +14,7 @@ class SalicMng extends Salic
      */
     public function __construct($lang)
     {
-        $this->current_lang = $lang;
+        parent::__construct($lang);
         $this->baseUrlInternational = '/edit/';
         $this->baseUrl = $this->baseUrlInternational . "$lang/";
     }
@@ -20,7 +22,7 @@ class SalicMng extends Salic
     public function renderBackend()
     {
         $this->doRenderPage($this->mainEditTemplate, array(
-            'pages' => $this->getPageSettings()['available'],
+            'pages' => Settings::getGeneralPageSettings()['available'],
         ));
     }
 
@@ -37,7 +39,7 @@ class SalicMng extends Salic
         }
         $regions = $_POST['regions'];
 
-        if ($pagekey !== '404' && !array_key_exists($pagekey, $this->getPageSettings()['available'])) {
+        if ($pagekey !== '404' && !array_key_exists($pagekey, Settings::getGeneralPageSettings()['available'])) {
             //TODO: error handling
             Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
         }

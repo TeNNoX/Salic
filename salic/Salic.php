@@ -9,19 +9,17 @@ require_once('SalicMng.php');
 
 /**
  * SaLiC = Sassy Little CMS
+ *  by TeNNoX
  */
 class Salic
 {
-    public $templates;
+    const defaultTemplate = 'default';
+    const errorTemplate = '@salic/error.html.twig';
+    const dataFileExtension = '.html';
+
+    protected $baseUrl; // baseUrls are not constants, because correctly overriding them is a bit... 'straightsideways' :P
+    protected $baseUrlInternational;
     protected $twig;
-
-    protected $defaultTemplate = 'default';
-    protected $template404 = '404.html.twig';
-    protected $errorTemplate = '@salic/error.html.twig';
-    protected $baseUrl;
-    protected $baseUrlInternational = '/';
-    protected $dataFileExtension = '.html';
-
     protected $current_lang;
 
     /**
@@ -35,15 +33,27 @@ class Salic
         $this->baseUrl = $this->baseUrlInternational . "$lang/";
     }
 
-    public function loadTemplates()
+    /**
+     * Loads the page-specific settings
+     *
+     * @param string $pagekey - the pagekey
+     * @return array - the settings array
+     * @throws SalicSettingsException - if it fails
+     */
+    public function getPageSettings($pagekey)
     {
-        if (!isset($this->templates)) // only if not already loaded
-            $this->templates = json_decode(file_get_contents('site/templates.json'), true);
+        // those other params are for generation of href values
+        return Settings::getPageSettings($pagekey);
     }
 
-    public function getPageSettings()
+    public function getTemplate($name, $pageinfo = "") // pageinfo will be added to exception message
     {
-        return Settings::getPageSettings($this->baseUrl, $this->defaultTemplate); // for generation of href values
+        $templates = Settings::getTemplateSettings();
+        if (!array_key_exists($name, $templates)) {
+            $pageinfo = " (page=$pageinfo)";
+            throw new SalicException("Template '$name' not found in templates.json" . $pageinfo);
+        }
+        return $templates[$name];
     }
 
     public function initTwig()
@@ -62,31 +72,22 @@ class Salic
     public function renderPage($pagekey)
     {
         try {
-            $pages = $this->getPageSettings()['available'];
-            if (!array_key_exists($pagekey, $pages)) { // when querying an invalid page, go back to home TODO: 404 page
+            $pages = Settings::getGeneralPageSettings()['available'];
+            if (!in_array($pagekey, $pages)) { // when querying an invalid page, go to 404
                 $this->render404();
                 return;
             }
 
             // load template and field data
-            $this->loadTemplates();
-            $page = $pages[$pagekey];
-            $template_key = $page['template'];
-            if (!array_key_exists($template_key, $this->templates)) {
-                throw new SalicException("Template '$template_key' not found in templates.json");
-            }
-            $template = $this->templates[$template_key];
-            $fields = array();
-            foreach ($template['fields'] as $field) {
-                $data = $this->loadField($field, $pagekey); // loads the data for the field
-                $fields[$field] = $data;
-            }
+            $pageSettings = $this->getPageSettings($pagekey);
 
-            $this->doRenderPage($template['file'], array(
-                'pagekey' => $pagekey,
-                'pagename' => $page['name'],
-                'fields' => $fields
-            ));
+            $template = $this->getTemplate($pageSettings['template'], $pagekey);
+
+            $data = $this->loadData($pagekey, $template);
+
+            $data['pagetitle'] = $pageSettings['title'];
+
+            $this->doRenderPage($template['file'], $data);
         } catch (\Exception $e) {
             $this->renderError($e);
         }
@@ -97,41 +98,87 @@ class Salic
         try {
             http_response_code(404);
 
-            $fields = array();
-            $fields['bannertext'] = $this->loadField('bannertext', '404', "<h1>Page not found</h1>"); // default
-
-            $fields['main'] = $this->loadField('main', '404',
-                "<p>The page you are looking for couldn't be found.<br><a href='/'>Go back to the homepage</a></p>");
-
-            $this->doRenderPage($this->template404, array(
-                'pagekey' => '404',
-                'pagename' => '404',
-                'fields' => $fields
-            ));
+            $data = $this->loadData('404', self::defaultTemplate);
+            $this->doRenderPage(self::defaultTemplate, $data);
         } catch (\Exception $e) {
             $this->renderError($e);
         }
     }
 
+    public function loadData($pagekey, $template)
+    {
+        $fields = array();
+        foreach ($template['fields'] as $field) {
+            $data = $this->loadField($field, $pagekey); // loads the data for the field
+            $fields[$field] = $data;
+        }
+
+        $areas = array();
+        foreach ($template['areas'] as $area) {
+            $data = $this->loadArea($area, $pagekey); // loads the data for the area
+            $areas[$area] = $data;
+        }
+
+        $data = array(
+            'pagekey' => $pagekey,
+            'pagetitle' => $pagekey, // can be changed by the calling function later
+            'fields' => $fields,
+            'areas' => $areas,
+        );
+        return $data;
+    }
+
+    /**
+     * Load the content for $field, or throws an exception
+     * if it fails AND $default is not set.
+     *
+     * @param string $field - the field name
+     * @param string $pagekey
+     * @param string $default - [optional] instead of throwing exception, return this
+     * @return string - the html content
+     * @throws SalicException - if it fails AND $default is not set
+     */
     public function loadField($field, $pagekey, $default = null)
     {
         if (!is_dir("site/data/$pagekey")) {
-            //throw new SalicException("No data for page '$pagekey'");
-            return $default;
+            if ($default != null)
+                return $default;
+            else // TODO: notify webmaster of missing data
+                //throw new SalicException("No data for page '$pagekey'");
+                return "";
         }
 
-        $file = "site/data/$pagekey/$field" . "_" . $this->current_lang . $this->dataFileExtension;
+        $file = "site/data/$pagekey/$field" . "_" . $this->current_lang . self::dataFileExtension;
         if (!is_file($file)) {
-            //throw new SalicException("No data for field '$field' on page '$pagekey'"); TODO: notify webmaster on missing variable
-            return $default;
+            if ($default != null)
+                return $default;
+            else
+                //throw new SalicException("No data for field '$field' on page '$pagekey'");
+                return "";
         }
         return file_get_contents($file);
+    }
+
+    /**
+     * Load the content for $area
+     *
+     * @param string $area - the area name
+     * @param string $pagekey
+     * @return string - the html content
+     * @throws SalicException - if it fails
+     */
+    private function loadArea($area, $pagekey)
+    {
+        if (!is_dir("site/data/$pagekey")) {
+            throw new SalicException("No data for page '$pagekey'");
+        }
+        return "";
     }
 
     private function renderError(\Exception $e)
     {
         http_response_code(500);
-        $this->doRenderPage($this->errorTemplate, array(
+        echo $this->twig->render(self::errorTemplate, array(
             'exception' => $e
         ));
     }
@@ -140,10 +187,10 @@ class Salic
     {
         $vars['baseurl'] = $this->baseUrl;
         $vars['baseurl_international'] = $this->baseUrlInternational;
-        $vars['nav_pages'] = Utils::removeHiddenPages($this->getPageSettings()['available']);
+        $vars['nav_pages'] = Utils::getNavPageList(Settings::getGeneralPageSettings(), $this->baseUrl);
         $vars['language'] = $this->current_lang;
         $vars['languages'] = Settings::getLangSettings()['available'];
-        $vars['default_page'] = $this->getPageSettings()['default'];
+        $vars['default_page'] = Settings::getGeneralPageSettings()['default'];
         echo $this->twig->render($templatefile, $vars);
     }
 }
