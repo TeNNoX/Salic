@@ -7,6 +7,19 @@ $(function () {
     var editor = ContentTools.EditorApp.get();
     editor.init('*[data-salic-name]', 'data-salic-name');
 
+    // HANDLE IMAGE UPLOADS
+    function imageUploader(dialog) {
+        var image, xhr, xhrComplete, xhrProgress;
+
+        // for now, just show an alert 'not implemented yet'
+        dialog.bind('imageUploader.fileReady', function () {
+            alert("Sorry, Image upload is not implemented yet. :(");
+            dialog.trigger('cancel');
+            new ContentTools.FlashUI('no');
+        });
+    }
+    ContentTools.IMAGE_UPLOADER = imageUploader;
+
     // SAVING
     editor.bind('save', function (regions) {
         if ($.isEmptyObject(regions)) {
