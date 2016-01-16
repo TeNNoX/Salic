@@ -7,6 +7,7 @@ class Settings
 
     private static $lang_settings;
     private static $page_settings;
+    private static $template_settings;
 
     public static function getLangSettings()
     {
@@ -50,6 +51,32 @@ class Settings
         return $json;
     }
 
+    public static function getTemplateSettings()
+    {
+        if (isset(self::$template_settings)) // cache for this request
+            return self::$template_settings;
+
+        $file = 'templates.json';
+        $json = self::parse(self::$baseDir . $file);
+        self::assertArray('default', $json, $file);
+
+        foreach($json as $name => &$template) {
+            $fileinfo = $file . ":$name";
+            self::assertString('file', $template, $fileinfo); // filename is e.g. 'templates.json:default'
+            // TODO: check if template file exists
+
+            self::assureArray('fields', $template, $fileinfo);
+        }
+        return $json;
+    }
+
+    /**
+     *
+     *
+     * @param $file -
+     * @return array - parsed array
+     * @throws SalicSettingsException - if reading or parsing fails
+     */
     private static function parse($file)
     {
         $raw = file_get_contents($file);
@@ -65,24 +92,60 @@ class Settings
         return $json;
     }
 
-    private static function assertString($key, $json, $file, $pattern = false)
+    /**
+     * Assert that $key exists in $array, and is a string.
+     *
+     * @param $key - the key to check for in the array
+     * @param array $array - the array what should be checked
+     * @param string $fileinfo - a filename, as info for the exception
+     * @param string $pattern - [optional] a regex that will be checked
+     * @throws SalicSettingsException - if assert fails
+     */
+    private static function assertString($key, array $array, $fileinfo, $pattern = null)
     {
-        if (!array_key_exists($key, $json))
-            throw new SalicSettingsException("Key '$key' not specified (in '$file')");
-        $value = $json[$key];
+        if (!array_key_exists($key, $array))
+            throw new SalicSettingsException("Key '$key' not specified (in '$fileinfo')");
+        $value = $array[$key];
         if (!is_string($value))
-            throw new SalicSettingsException("Key '$key' is not a string (in '$file')");
+            throw new SalicSettingsException("Key '$key' is not a string (in '$fileinfo')");
         if ($pattern && preg_match($pattern, $value) !== 1)
-            throw new SalicSettingsException("Invalid value for '$key' (in '$file')");
+            throw new SalicSettingsException("Invalid value for '$key' (in '$fileinfo')");
     }
 
-    private static function assertArray($key, $json, $file, $pattern = false)
+
+    /**
+     * Assert that $key exists in $array, and is an array.
+     *
+     * @param $key - the key to check for in the array
+     * @param array $array - the array what should be checked
+     * @param string $fileinfo - a filename, as info for the exception
+     * @throws SalicSettingsException - if assert fails
+     */
+    private static function assertArray($key, $array, $fileinfo)
     {
-        if (!array_key_exists($key, $json))
-            throw new SalicSettingsException("Key '$key' not specified (in '$file')");
-        $value = $json[$key];
+        if (!array_key_exists($key, $array))
+            throw new SalicSettingsException("Key '$key' not specified (in '$fileinfo')");
+        $value = $array[$key];
         if (!is_array($value))
-            throw new SalicSettingsException("Key '$key' is not an array (in '$file')");
+            throw new SalicSettingsException("Key '$key' is not an array (in '$fileinfo')");
+    }
+
+    /**
+     * Checks if that array contains $key and if it is an array.
+     * - no key => create empty one in $array[$key]
+     * - not array => throw exception
+     *
+     * @param $key - the key to check for in the array
+     * @param array $array - the array what should be checked
+     * @param string $fileinfo - a filename, as info for the exception
+     * @throws SalicSettingsException - if key exists, but is not an array
+     */
+    private static function assureArray($key, &$array, $fileinfo)
+    {
+        if (!array_key_exists($key, $array)) {
+            $array[$key] = array();
+        } else if (!is_array($array[$key]))
+            throw new SalicSettingsException("Key '$key' is not an array (in '$fileinfo')");
     }
 }
 
