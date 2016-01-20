@@ -22,12 +22,16 @@ if (array_key_exists('lang', $_GET)) {
 }
 
 $salic = new Salic($lang);
+$salic->initTwig();
 
 if (empty($page)) {
-    $page = Settings::getGeneralPageSettings()['default'];
+    try {
+        $page = Settings::getNavSettings()['homepage'];
+    } catch (\Exception $e) {
+        $salic->renderError($e, "selecting homepage");
+    }
 }
 
-$salic->initTwig();
 $salic->renderPage($page);
 
 ?>

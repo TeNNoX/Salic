@@ -4,11 +4,10 @@ namespace salic;
 class Settings
 {
     const baseDir = 'site/';
-    const dataDir = 'data/';
 
     // cached settings
     private static $lang_settings;
-    private static $general_page_settings;
+    private static $nav_settings;
     private static $template_settings;
 
     private static $page_settings = array();
@@ -19,7 +18,8 @@ class Settings
             return self::$lang_settings;
 
         $file = 'languages.json';
-        $json = self::parse(self::baseDir . $file);
+        $json = self::parseOrCreate(self::baseDir . $file,
+            ['default' => 'en', 'available' => ['en']]);
         self::assertArray('available', $json, $file);
 
         $keys = array_keys($json['available']);
@@ -33,32 +33,26 @@ class Settings
         return $json;
     }
 
-    public static function getGeneralPageSettings()
+    public static function getNavSettings()
     {
-        if (isset(self::$general_page_settings)) // cache for this request
-            return self::$general_page_settings;
+        if (isset(self::$nav_settings)) // cache for this request
+            return self::$nav_settings;
 
-        $file = 'pages.json';
-        $json = self::parse(self::baseDir . $file);
+        $file = 'navigation.json';
+        $json = self::parseOrCreate(self::baseDir . $file,
+            ['homepage' => 'home', 'displayed' => ['home']]);
 
-        self::assertString('default', $json, $file);
-        self::assertArray('available', $json, $file);
+        self::assertArray('displayed', $json, $file);
+        $displayed = $json['displayed'];
 
-        $avail = $json['available'];
-        if (!array_key_exists('default', $json)) {
-            $json['default'] = array_shift($avail); // select first page as default
-        } else if (!in_array($json['default'], $avail)) {
-            throw new SalicSettingsException("default page '" . $json['default'] . "' is not in 'availiable' (in '$file')");
+
+        if (!array_key_exists('homepage', $json)) { // if not set, select first page as default
+            $json['default'] = array_shift($displayed);
+        } else if (!Utils::pageExists($json['homepage'])) {// make sure the specified homepage exists
+            throw new SalicSettingsException("No page '" . $json['homepage'] . "' found in data/ (mentioned in '$file:homepage')");
         }
 
-        self::assureArray('hidden_in_nav', $json, $file);
-        // TODO: warning when hidden page is invalid
-        // an exception is not really necessary:
-        /*foreach ($json['hidden_in_nav'] as $pagekey) {
-            if (!in_array($pagekey, $avail)) {
-                throw new SalicSettingsException("Hidden page '" . $json['default'] . "' is not in 'availiable' (in '$file')");
-            }
-        }*/
+        self::assureArray('external_links', $json, $file);
 
         return $json;
     }
@@ -68,10 +62,21 @@ class Settings
         if (isset(self::$page_settings[$pagekey])) // cache for this request
             return self::$page_settings[$pagekey];
 
+        Utils::mkdirs(self::baseDir . "data/$pagekey");
         $file = "data/$pagekey/page.json";
-        $json = self::parse(self::baseDir . $file);
-        self::assertExists('title', $json, $file);
-        self::assureString('template', $json, $file);
+
+        // generate default areas (needed for parseOrCreate)
+        $defaultAreas = array(); // ['area1' => [], 'area2' => []]
+        foreach (self::getTemplateSettings()['default']['areas'] as $area) {
+            $defaultAreas[$area] = array();
+        }
+        $json = self::parseOrCreate(self::baseDir . $file,
+            ['title' => ucfirst($pagekey),  // generate string via uppercasing first letter of pagekey
+                'template' => 'default',
+                'areas' => $defaultAreas]); // the area names
+
+        // check title
+        self::assureNotEmptyStringOrArray('title', $json, $file, ucfirst($pagekey)); //TODO: validate page title translations
 
         self::assureArray('areas', $json, $file);
         $areas = $json['areas'];
@@ -95,7 +100,7 @@ class Settings
         }
 
         // set default template if not specified
-        if (!array_key_exists('template', $json)) {
+        if (!array_key_exists('template', $json) || !$json['template']) {
             $json['template'] = Salic::defaultTemplate;
         }
 
@@ -108,7 +113,8 @@ class Settings
             return self::$template_settings;
 
         $file = 'templates.json';
-        $json = self::parse(self::baseDir . $file);
+        $json = self::parseOrCreate(self::baseDir . $file,
+            ['file' => 'default.html.twig', 'fields' => [], "areas" => []]);
         self::assertArray('default', $json, $file);
 
         foreach ($json as $name => &$template) {
@@ -121,20 +127,6 @@ class Settings
             self::assureArray('areas', $template, $fileinfo);
         }
         return $json;
-    }
-
-    /**
-     * Assert that $key exists in $array.
-     *
-     * @param $key - the key to check for in the array
-     * @param array $array - the array what should be checked
-     * @param string $fileinfo - a filename, as info for the exception
-     * @throws SalicSettingsException - if assert fails
-     */
-    private static function assertExists($key, array $array, $fileinfo)
-    {
-        if (!array_key_exists($key, $array))
-            throw new SalicSettingsException("Key '$key' not specified (in '$fileinfo')");
     }
 
     /**
@@ -173,6 +165,24 @@ class Settings
         $value = $array[$key];
         if (!is_array($value))
             throw new SalicSettingsException("Key '$key' is not an array (in '$fileinfo')");
+    }
+
+    /**
+     * Assert that $key exists in $array.
+     *
+     * @param $key - the key to check for in the array
+     * @param array $array - the array what should be checked
+     * @param string $fileinfo - a filename, as info for the exception
+     * @throws SalicSettingsException - if assert fails
+     */
+    private static function assureNotEmptyStringOrArray($key, array &$array, $fileinfo, $default)
+    {
+        if (!array_key_exists($key, $array))
+            $array[$key] = $default;
+        else if (!is_string($array[$key]) && !is_array($array[$key]))
+            throw new SalicSettingsException("Key '$key' is neither string nor array (in '$fileinfo')");
+        else if (empty($array[$key]))
+            $array[$key] = $default;
     }
 
     /**
@@ -224,7 +234,7 @@ class Settings
     private static function parse($file)
     {
         if (!is_file($file))
-            throw new SalicSettingsException("File '$file' does not exist"); //TODO: default values when json files don't exist
+            throw new SalicSettingsException("File '$file' does not exist");
 
         $raw = file_get_contents($file);
         if ($raw === false)
@@ -237,6 +247,48 @@ class Settings
         if (!$json || json_last_error() !== JSON_ERROR_NONE)
             throw new SalicSettingsException("Unable to parse '$file': " . json_last_error_msg());
         return $json;
+    }
+
+    /**
+     * Parse the given json file to array
+     * + remove comments
+     * + If if doesn't exist, try to create it
+     *
+     * @param $file - well, the file
+     * @param $default - the default content
+     * @return array - parsed array
+     * @throws SalicSettingsException - if parsing or creating fails
+     */
+    private static function parseOrCreate($file, $default)
+    {
+        if (!is_file($file))
+            self::saveJsonFile($file, $default);
+        // still read if after that, because there could be situations, where writing works, but reading doesn't
+        // -> it would work one time, when the file does not exist, but not when it does. (stability > efficiency)
+
+        $raw = file_get_contents($file);
+        if ($raw === false)
+            throw new SalicSettingsException("Unable to read '$file'");
+
+        // remove comments (source: https://secure.php.net/manual/en/function.json-decode.php#111551)
+        $raw = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t](//).*)#", '', $raw);
+
+        $json = json_decode($raw, true);
+        if (!$json || json_last_error() !== JSON_ERROR_NONE)
+            throw new SalicSettingsException("Unable to parse '$file': " . json_last_error_msg());
+        return $json;
+    }
+
+    /**
+     * Saves (or creates) that json file
+     *
+     * @param $file
+     * @param $data
+     */
+    private static function saveJsonFile($file, $data)
+    {
+        $raw = json_encode($data, JSON_PRETTY_PRINT);
+        file_put_contents($file, $raw);
     }
 }
 

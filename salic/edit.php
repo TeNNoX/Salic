@@ -21,8 +21,12 @@ $salic = new SalicMng($lang);
 $salic->initTwig();
 
 $page = strtolower($_GET['page']);
-if (!$page) { // default page
-    $page = Settings::getGeneralPageSettings()['default'];
+if (empty($page)) { // default page
+    try {
+        $page = Settings::getNavSettings()['homepage'];
+    } catch (\Exception $e) {
+        $salic->renderError($e, "selecting homepage");
+    }
 }
 
 $salic->renderPage($page);

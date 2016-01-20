@@ -2,7 +2,7 @@
 
 namespace salic;
 
-class SalicMng extends Salic
+class SalicMng extends Salic //TODO: implement backend
 {
     const baseUrlInternational = "/edit/";
 
@@ -10,7 +10,7 @@ class SalicMng extends Salic
 
     /**
      * SalicMng constructor.
-     * @param $lang the language for this request
+     * @param string $lang The language for this request
      */
     public function __construct($lang)
     {
@@ -22,7 +22,7 @@ class SalicMng extends Salic
     public function renderBackend()
     {
         $this->doRenderPage($this->mainEditTemplate, array(
-            'pages' => Settings::getGeneralPageSettings()['available'],
+            'pages' => Settings::getNavSettings()['displayed'],
         ));
     }
 
@@ -39,7 +39,7 @@ class SalicMng extends Salic
         }
         $regions = $_POST['regions'];
 
-        if ($pagekey !== '404' && !array_key_exists($pagekey, Settings::getGeneralPageSettings()['available'])) {
+        if ($pagekey !== '404' && !array_key_exists($pagekey, Settings::getNavSettings()['displayed'])) {
             //TODO: error handling
             Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
         }
@@ -57,10 +57,10 @@ class SalicMng extends Salic
                 }
             }
 
-            $filename = $key . "_" . $this->current_lang . $this->dataFileExtension; // save as 'pagekey_lang.ext'
+            $filename = $key . "_" . $this->current_lang . self::dataFileExtension; // save as 'pagekey_lang.ext'
             $flag = file_put_contents($page_dir . $filename, $val, LOCK_EX); // lock the file exclusively while writing
             if ($flag === false) {
-                throw new \Exception("Failed to write file '$page_dir$key" . $this->dataFileExtension . "'");
+                throw new \Exception("Failed to write file '$page_dir$key" . self::dataFileExtension . "'");
             }
             //TODO: set file permissions
         }

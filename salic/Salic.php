@@ -72,8 +72,7 @@ class Salic
     public function renderPage($pagekey)
     {
         try {
-            $pages = Settings::getGeneralPageSettings()['available'];
-            if (!in_array($pagekey, $pages)) { // when querying an invalid page, go to 404
+            if (!Utils::pageExists($pagekey)) { // when querying an invalid page, go to 404
                 $this->render404();
                 return;
             }
@@ -89,7 +88,7 @@ class Salic
 
             $this->doRenderPage($template['file'], $data);
         } catch (\Exception $e) {
-            $this->renderError($e);
+            $this->renderError($e, "rendering page");
         }
     }
 
@@ -101,7 +100,7 @@ class Salic
             $data = $this->loadData('404', self::defaultTemplate);
             $this->doRenderPage(self::defaultTemplate, $data);
         } catch (\Exception $e) {
-            $this->renderError($e);
+            $this->renderError($e, "rendering 404");
         }
     }
 
@@ -175,22 +174,30 @@ class Salic
         return "";
     }
 
-    private function renderError(\Exception $e)
+    /**
+     * Render the error page, and exit (not return, exit)
+     *
+     * @param \Exception $e - the exception that occured
+     * @param $while - exception happened while XY
+     */
+    function renderError(\Exception $e, $while)
     {
         http_response_code(500);
         echo $this->twig->render(self::errorTemplate, array(
-            'exception' => $e
+            'while' => $while,
+            'exception' => $e,
         ));
+        exit;
     }
 
     protected function doRenderPage($templatefile, $vars)
     {
         $vars['baseurl'] = $this->baseUrl;
         $vars['baseurl_international'] = $this->baseUrlInternational;
-        $vars['nav_pages'] = Utils::getNavPageList(Settings::getGeneralPageSettings(), $this->baseUrl);
+        $vars['nav_pages'] = Utils::getNavPageList(Settings::getNavSettings(), $this->baseUrl, $this->current_lang);
         $vars['language'] = $this->current_lang;
         $vars['languages'] = Settings::getLangSettings()['available'];
-        $vars['default_page'] = Settings::getGeneralPageSettings()['default'];
+        $vars['default_page'] = Settings::getNavSettings()['homepage'];
         echo $this->twig->render($templatefile, $vars);
     }
 }

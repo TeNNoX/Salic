@@ -20,7 +20,9 @@
 
     <h3>Webmaster info:</h3>
 
-    Error: {{ exception.getMessage() }}
+    <b>Happened while</b>: {{ while }}<br>
+
+    <b>Error</b>: {{ exception.getMessage() }}
     <br> <br>
     Trace:
     <pre>{{ exception.getTraceAsString() }}</pre>
