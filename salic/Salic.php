@@ -1,11 +1,13 @@
 <?php
 
-namespace salic;
+namespace Salic;
 
-require(__DIR__ . '/../vendor/autoload.php');
-require_once('Exceptions.php');
-require_once('Utils.php');
-require_once('SalicMng.php');
+use Salic\Exception\SalicException;
+use Twig_Environment;
+use Twig_Filter_Function;
+use Twig_Loader_Filesystem;
+
+$loader = require(__DIR__ . '/../vendor/autoload.php');
 
 /**
  * SaLiC = Sassy Little CMS
@@ -33,41 +35,30 @@ class Salic
         $this->baseUrl = $this->baseUrlInternational . "$lang/";
     }
 
-    /**
-     * Loads the page-specific settings
-     *
-     * @param string $pagekey - the pagekey
-     * @return array - the settings array
-     * @throws SalicSettingsException - if it fails
-     */
-    public function getPageSettings($pagekey)
-    {
-        // those other params are for generation of href values
-        return Settings::getPageSettings($pagekey);
-    }
-
     public function getTemplate($name, $pageinfo = "") // pageinfo will be added to exception message
     {
-        $templates = Settings::getTemplateSettings();
-        if (!array_key_exists($name, $templates)) {
+        $templateSettings = Settings\TemplateSettings::get();
+        if (!$templateSettings->exists($name)) {
             if (!empty($pageinfo)) // format it, or leave it empty
                 $pageinfo = " (page=$pageinfo)";
             throw new SalicException("Template '$name' not found in templates.json" . $pageinfo);
         }
-        return $templates[$name];
+        return $templateSettings->sub($name);
     }
 
     public function initTwig()
     {
-        $loader = new \Twig_Loader_Filesystem('site/template');    // look into main templates first
+        $loader = new Twig_Loader_Filesystem('site/template');    // look into main templates first
         $loader->addPath(__DIR__ . '/template', 'salic');
 
-        $this->twig = new \Twig_Environment($loader, array(
+        $this->twig = new Twig_Environment($loader, array(
             /*'cache' => __DIR__ . '/compilation_cache', */ //TODO: enable twig caching
             'auto_reload' => true,
             'strict_variables' => true,
             'autoescape' => false,
         ));
+
+        $this->twig->addFilter(new \Twig_SimpleFilter('get_class', 'get_class'));
     }
 
     public function renderPage($pagekey)
@@ -79,13 +70,13 @@ class Salic
             }
 
             // load template and field data
-            $pageSettings = $this->getPageSettings($pagekey);
+            $pageSettings = Settings\PageSettings::get($pagekey);
 
-            $template = $this->getTemplate($pageSettings['template'], $pagekey);
+            $template = $this->getTemplate($pageSettings->template, $pagekey);
 
             $data = $this->loadData($pagekey, $template);
 
-            $data['pagetitle'] = $pageSettings['title'];
+            $data['pagetitle'] = $pageSettings->title->get($this->current_lang);
 
             $this->doRenderPage($template['file'], $data);
         } catch (\Exception $e) {
@@ -168,15 +159,15 @@ class Salic
             throw new SalicException("No data for page '$pagekey'");
         }
 
-        $blocks = Settings::getPageSettings($pagekey)['areas'][$area];
+        $blocks = Settings\PageSettings::get($pagekey)->areas[$area];
         $rendered = "";
 
         // fetch all blocks for this area
         foreach ($blocks as $block) {
             $file = "site/data/$pagekey/$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
             if (!is_file($file)) {
-                throw new SalicException("Block not found: '$file'");
-                //return "";
+                //throw new SalicException("Block not found: '$file'");
+                return "";
             }
             $salicName = $area . "_" . $block['key'];
             $content = file_get_contents($file);
@@ -208,10 +199,10 @@ class Salic
     {
         $vars['baseurl'] = $this->baseUrl;
         $vars['baseurl_international'] = $this->baseUrlInternational;
-        $vars['nav_pages'] = Utils::getNavPageList(Settings::getNavSettings(), $this->baseUrl, $this->current_lang);
+        $vars['nav_pages'] = Utils::getNavPageList($this->baseUrl, $this->current_lang);
         $vars['language'] = $this->current_lang;
-        $vars['languages'] = Settings::getLangSettings()['available'];
-        $vars['default_page'] = Settings::getNavSettings()['homepage'];
+        $vars['languages'] = Settings\LangSettings::get()->available;
+        $vars['default_page'] = Settings\NavSettings::get()->homepage;
         echo $this->twig->render($templatefile, $vars);
     }
 }

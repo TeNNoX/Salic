@@ -22,10 +22,21 @@
 
     <b>Happened while</b>: {{ while }}<br>
 
-    <b>Error</b>: {{ exception.getMessage() }}
-    <br> <br>
+    <b>Exception</b>: {{ exception|get_class }} <br>
+    <b>Message</b>: {{ exception.getMessage() }} <br>
+    {% if exception.fileInfo is defined and exception.fileInfo is not null %}
+        <b>FileInfo</b>: {{ exception.fileInfo }} <br>
+    {% endif %}
+
+    <br>
     Trace:
     <pre>{{ exception.getTraceAsString() }}</pre>
+
+    {% if exception.data is defined and exception.data is not null %}
+        <br>
+        Data:
+        <pre>{{ exception.data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+    {% endif %}
 </div>
 </body>
 </html>

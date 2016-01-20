@@ -1,6 +1,8 @@
 <?php
 
-namespace salic;
+namespace Salic;
+
+use Salic\Settings\NavSettings;
 
 class SalicMng extends Salic //TODO: implement backend
 {
@@ -20,9 +22,9 @@ class SalicMng extends Salic //TODO: implement backend
     }
 
     public function renderBackend()
-    {
+    { //TODO: implement/fix backend
         $this->doRenderPage($this->mainEditTemplate, array(
-            'pages' => Settings::getNavSettings()['displayed'],
+            'pages' => Settings\NavSettings::get()->displayed,
         ));
     }
 
@@ -39,7 +41,7 @@ class SalicMng extends Salic //TODO: implement backend
         }
         $regions = $_POST['regions'];
 
-        if ($pagekey !== '404' && !array_key_exists($pagekey, Settings::getNavSettings()['displayed'])) {
+        if ($pagekey !== '404' && !NavSettings::get()->exists($pagekey)) { //TODO: saving
             //TODO: error handling
             Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
         }

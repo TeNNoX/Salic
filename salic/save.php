@@ -1,12 +1,13 @@
 <?php
-namespace salic;
+namespace Salic;
+use Salic\Settings\LangSettings;
+
 require_once('Salic.php');
 
 $page = $_GET['page'];
 
-$lang_settings = Settings::getLangSettings();
 $lang = strtolower($_GET['lang']);
-if (!array_key_exists($lang, $lang_settings['available'])) {
+if (!LangSettings::get()->exists($lang)) {
     echo "Invalid Language: $lang"; //TODO:
     exit;
 }

@@ -1,8 +1,14 @@
 <?php
 
-namespace salic;
+namespace Salic;
 
-require_once 'Settings.php';
+use Salic\Exception\SalicSettingsException;
+use Salic\Settings\LangSettings;
+use Salic\Settings\NavSettings;
+use Salic\Settings\PageSettings;
+use Salic\Settings\Settings;
+
+require_once 'Settings/Settings.php';
 
 class Utils
 {
@@ -14,10 +20,10 @@ class Utils
      */
     public static function getDefaultLanguageFromHeader()
     {
-        $lang_settings = Settings::getLangSettings();
+        $lang_settings = LangSettings::get();
 
-        $default = $lang_settings['default'];
-        $available = array_keys($lang_settings['available']);
+        $default = $lang_settings->default;
+        $available = array_keys($lang_settings->available);
 
         require_once 'LanguageDetection.php';
         return getDefaultLanguage($available, $default);
@@ -40,23 +46,23 @@ class Utils
      *
      * eg: ['page1' => ['title' => "Page 1", 'href' => "/page1"]]
      *
-     * @param $navSettings
      * @param $baseUrl
      * @param $lang
      * @return array
      * @throws SalicSettingsException
      */
-    public static function getNavPageList($navSettings, $baseUrl, $lang) // = general page settings
+    public static function getNavPageList($baseUrl, $lang) // = general page settings
     {
+        $navSettings = NavSettings::get();
         $nav_array = array();
-        $pages = $navSettings['displayed'];
-        $external = $navSettings['external_links'];
+        $pages = $navSettings->displayed;
+        $external = $navSettings->external_links;
         foreach ($pages as $key) {
-            $title = Utils::getPageTitle($key, $lang);
+            $title = PageSettings::get($key)->title->get($lang);
             $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key);
             $nav_array[$key] = array(
                 'title' => $title,
-                'href' => $baseUrl . $key,
+                'href' => $href,
             );
         }
         return $nav_array;
@@ -84,28 +90,8 @@ class Utils
     {
         if (!is_dir($path)) {
             if (!mkdir($path, $mode, true))
-                throw new SalicSettingsException("Couldn't create directory '$path'");
+                throw new SalicSettingsException("Couldn't create directory", $path);
         }
-    }
-
-    /**
-     * Gets the appropriate title for a page.
-     * If translations are available, use the one needed, if not, take what's there.
-     *
-     * @param string $pageKey - the page of which we should get the title
-     * @param string $lang - the language we should get it in (if translations exist)
-     * @return string - the (translated?) title
-     * @throws SalicSettingsException - if the translation does not exist (but there are some translations)
-     */
-    private static function getPageTitle($pageKey, $lang)
-    {
-        $pageSettings = Settings::getPageSettings($pageKey);
-        if (!is_array($pageSettings['title']))
-            return $pageSettings['title'];
-        else if (!array_key_exists($lang, $pageSettings['title']))
-            throw new SalicSettingsException("Page title doesn't have translation for '$lang' (" . $pageSettings . ")");
-        else
-            return $pageSettings['title'][$lang];
     }
 
     public static function pageExists($pagekey)
