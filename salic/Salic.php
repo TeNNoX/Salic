@@ -50,7 +50,8 @@ class Salic
     {
         $templates = Settings::getTemplateSettings();
         if (!array_key_exists($name, $templates)) {
-            $pageinfo = " (page=$pageinfo)";
+            if (!empty($pageinfo)) // format it, or leave it empty
+                $pageinfo = " (page=$pageinfo)";
             throw new SalicException("Template '$name' not found in templates.json" . $pageinfo);
         }
         return $templates[$name];
@@ -137,23 +138,18 @@ class Salic
      * @return string - the html content
      * @throws SalicException - if it fails AND $default is not set
      */
-    public function loadField($field, $pagekey, $default = null)
+    public function loadField($field, $pagekey)
     {
         if (!is_dir("site/data/$pagekey")) {
-            if ($default != null)
-                return $default;
-            else // TODO: notify webmaster of missing data
-                //throw new SalicException("No data for page '$pagekey'");
-                return "";
+            // TODO: notify webmaster of missing data
+            //throw new SalicException("No data for page '$pagekey'");
+            return "";
         }
 
         $file = "site/data/$pagekey/$field" . "_" . $this->current_lang . self::dataFileExtension;
         if (!is_file($file)) {
-            if ($default != null)
-                return $default;
-            else
-                //throw new SalicException("No data for field '$field' on page '$pagekey'");
-                return "";
+            //throw new SalicException("No data for field '$field' on page '$pagekey'");
+            return "";
         }
         return file_get_contents($file);
     }
@@ -171,7 +167,25 @@ class Salic
         if (!is_dir("site/data/$pagekey")) {
             throw new SalicException("No data for page '$pagekey'");
         }
-        return "";
+
+        $blocks = Settings::getPageSettings($pagekey)['areas'][$area];
+        $rendered = "";
+
+        // fetch all blocks for this area
+        foreach ($blocks as $block) {
+            $file = "site/data/$pagekey/$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
+            if (!is_file($file)) {
+                throw new SalicException("Block not found: '$file'");
+                //return "";
+            }
+            $salicName = $area . "_" . $block['key'];
+            $content = file_get_contents($file);
+            $rendered .= $this->twig->render('blocks/' . $block['type'] . '.html.twig', array(
+                'salic_name' => $salicName,
+                'content' => $content,
+            ));
+        }
+        return $rendered;
     }
 
     /**

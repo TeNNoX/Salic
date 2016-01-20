@@ -78,9 +78,26 @@ class Settings
         // check title
         self::assureNotEmptyStringOrArray('title', $json, $file, ucfirst($pagekey)); //TODO: validate page title translations
 
+        // set default template if not specified
+        if (!array_key_exists('template', $json) || !$json['template']) {
+            $json['template'] = Salic::defaultTemplate;
+        }
+        // check if template is valid
+        $templateSettings = Settings::getTemplateSettings();
+        if(!array_key_exists($json['template'], $templateSettings))
+            throw new SalicSettingsException("Template '".$json['template']."' doesn't exist (in $file)");
+        $templateAreas = $templateSettings[$json['template']]['areas'];
+        foreach($templateAreas as $area) {
+            self::assureArray($area, $json['areas'], $file.":areas");
+        }
+
         self::assureArray('areas', $json, $file);
         $areas = $json['areas'];
         foreach ($areas as $areaKey => $blocks) { // check all areas
+            // check if area exists in template
+            if (!in_array($areaKey, $templateAreas))
+                throw new SalicSettingsException("Area '$areaKey' doesn't exist in the template (in '$file')");
+
             if (!is_array($blocks))
                 throw new SalicSettingsException("Value for area '$areaKey' is not an array (in '$file')");
             $blockKeys = array(); // for duplicate checking
@@ -97,11 +114,6 @@ class Settings
                 self::assertString('type', $block, $file . ":areas>$areaKey>$blockKey"); // eg. 'templates.json:areas>main>intro'
                 // TODO: check if block exists
             }
-        }
-
-        // set default template if not specified
-        if (!array_key_exists('template', $json) || !$json['template']) {
-            $json['template'] = Salic::defaultTemplate;
         }
 
         return $json;
