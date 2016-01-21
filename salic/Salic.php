@@ -44,7 +44,7 @@ class Salic
                 $pageinfo = " (page=$pageinfo)";
             throw new SalicException("Template '$name' not found in templates.json" . $pageinfo);
         }
-        return $templateSettings->sub($name);
+        return $templateSettings->data($name);
     }
 
     public function initTwig()

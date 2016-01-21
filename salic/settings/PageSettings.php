@@ -96,7 +96,7 @@ class PageSettings extends Settings
             throw new SalicSettingsException("Template '" . $this->template . "' not found", $this->file, $templateSettings->templates);
 
         // create empty areas that are not present
-        $myTemplate = $templateSettings->sub($this->template);
+        $myTemplate = $templateSettings->data($this->template);
         $templateAreas = $myTemplate['areas'];
         foreach ($templateAreas as $area) {
             if (!array_key_exists($area, $this->areas))
