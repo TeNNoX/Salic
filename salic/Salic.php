@@ -169,12 +169,10 @@ class Salic
         // fetch all blocks for this area
         foreach ($blocks as $block) {
             $file = "site/data/$pagekey/$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
-            if (!is_file($file)) {
-                //throw new SalicException("Block not found: '$file'");
-                return "";
-            }
+            // default to empty content
+            $content = is_file($file) ? file_get_contents($file) : '';
+
             $salicName = $area . "_" . $block['key'];
-            $content = file_get_contents($file);
             $rendered .= $this->twig->render('blocks/' . $block['type'] . '.html.twig', array(
                 'salic_name' => $salicName,
                 'content' => $content,
