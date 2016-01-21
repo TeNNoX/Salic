@@ -3,8 +3,8 @@
 namespace Salic;
 
 use Salic\Exception\SalicException;
+use Salic\Exception\SalicSettingsException;
 use Twig_Environment;
-use Twig_Filter_Function;
 use Twig_Loader_Filesystem;
 
 $loader = require(__DIR__ . '/../vendor/autoload.php');
@@ -59,6 +59,10 @@ class Salic
         ));
 
         $this->twig->addFilter(new \Twig_SimpleFilter('get_class', 'get_class'));
+        $this->twig->addFilter(new \Twig_SimpleFilter('var_export', 'var_export'));
+        $this->twig->addTest(new \Twig_SimpleTest('SettingsException', function ($value) {
+            return $value instanceof SalicSettingsException;
+        }));
     }
 
     public function renderPage($pagekey)

@@ -24,18 +24,18 @@
 
     <b>Exception</b>: {{ exception|get_class }} <br>
     <b>Message</b>: {{ exception.getMessage() }} <br>
-    {% if exception.fileInfo is defined and exception.fileInfo is not null %}
-        <b>FileInfo</b>: {{ exception.fileInfo }} <br>
+    {% if exception is SettingsException %}
+        <b>FileInfo</b>: {{ exception.fileInfo|var_export }} <br>
     {% endif %}
 
     <br>
-    Trace:
+    <b>Trace:</b>
     <pre>{{ exception.getTraceAsString() }}</pre>
 
-    {% if exception.data is defined and exception.data is not null %}
+    {% if exception is SettingsException %}
         <br>
-        Data:
-        <pre>{{ exception.data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+        <b>Data:</b>
+        <pre>{{ exception.data|var_export }}</pre>
     {% endif %}
 </div>
 </body>
