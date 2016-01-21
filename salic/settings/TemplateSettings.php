@@ -100,7 +100,7 @@ class TemplateSettings extends Settings
                 $template['areas'] = [];
 
             //TODO: parse templates to Template objects
-            //TODO: sanitize var/field/area/block names (no underscore?)
+            //TODO: sanitize var/field/area/block names (no underscore?, no dot, ...)
             self::getList('fields', $template, $fileInfo);
             self::getDict('variables', $template, $fileInfo);
             self::getList('areas', $template, $fileInfo);
