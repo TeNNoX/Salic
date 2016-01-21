@@ -36,17 +36,28 @@ class SalicMng extends Salic //TODO: implement backend
 
     public function savePage($pagekey)
     {
-        if (!array_key_exists('regions', $_POST)) {
-            Utils::returnHttpError(400, "Error: missing regions in POST data");
-        }
-        $regions = $_POST['regions'];
+        $result = array(
+            "success" => false,
+        );
 
-        if ($pagekey !== '404' && !NavSettings::get()->exists($pagekey)) { //TODO: saving
-            //TODO: error handling
-            Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
+        try {
+            if (!array_key_exists('regions', $_POST)) {
+                Utils::returnHttpError(400, "Error: missing regions in POST data");
+            }
+            $regions = $_POST['regions'];
+
+            if ($pagekey !== '404' && !Utils::pageExists($pagekey)) {
+                //TODO: error handling
+                Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
+            }
+
+            $this->doSavePage($pagekey, $regions);
+            $result['success'] = true;
+        } catch (\Exception $e) {
+            $result['error'] = "PHPException -: " . $e->getMessage();
         }
 
-        $this->doSavePage($pagekey, $regions);
+        echo json_encode($result);
     }
 
     public function doSavePage($pagekey, array $regions)

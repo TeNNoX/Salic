@@ -19,6 +19,5 @@ if (empty($page)) {
 }
 
 $salic->savePage($page);
-die("success"); // if not stopped by an exception, print out the good news
 
 ?>
