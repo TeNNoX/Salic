@@ -4,6 +4,7 @@ namespace Salic;
 
 use Salic\Exception\SalicException;
 use Salic\Exception\SalicSettingsException;
+use Salic\Settings\PageSettings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -108,6 +109,12 @@ class Salic
             $fields[$field] = $data;
         }
 
+        $variables = array();
+        foreach ($template['variables'] as $var => $defaultVal) {
+            $data = $this->loadVar($var, $defaultVal, $pagekey); // loads the data for the field
+            $variables[$var] = $data;
+        }
+
         $areas = array();
         foreach ($template['areas'] as $area) {
             $data = $this->loadArea($area, $pagekey); // loads the data for the area
@@ -118,6 +125,7 @@ class Salic
             'pagekey' => $pagekey,
             'pagetitle' => $pagekey, // can be changed by the calling function later
             'fields' => $fields,
+            'variables' => $variables,
             'areas' => $areas,
         );
         return $data;
@@ -129,9 +137,8 @@ class Salic
      *
      * @param string $field - the field name
      * @param string $pagekey
-     * @param string $default - [optional] instead of throwing exception, return this
-     * @return string - the html content
-     * @throws SalicException - if it fails AND $default is not set
+     * @return string The html content
+     * @throws SalicException If it fails
      */
     public function loadField($field, $pagekey)
     {
@@ -141,12 +148,31 @@ class Salic
             return "";
         }
 
-        $file = "site/data/$pagekey/$field" . "_" . $this->current_lang . self::dataFileExtension;
+        // field files start with '_' (to make it clear, that they don't belong to an area)
+        $file = "site/data/$pagekey/_$field" . "_" . $this->current_lang . self::dataFileExtension;
         if (!is_file($file)) {
             //throw new SalicException("No data for field '$field' on page '$pagekey'");
             return "";
         }
         return file_get_contents($file);
+    }
+
+    /**
+     * Load the value for $var, or throws an exception
+     * if it fails AND $default is not set.
+     *
+     * @param string $var
+     * @param string $pagekey
+     * @return mixed The value
+     * @throws SalicException If it fails
+     */
+    public function loadVar($var, $defaultVal, $pagekey)
+    {
+        $pageVars = PageSettings::get($pagekey)->variables;
+        if (array_key_exists($var, $pageVars))
+            return $pageVars[$var];
+        else
+            return $defaultVal;
     }
 
     /**

@@ -66,6 +66,7 @@ class TemplateSettings extends Settings
             'default' => [
                 'file' => 'default.html.twig',
                 'fields' => [],
+                'variables' => [],
                 "areas" => [],
             ],
         ];
@@ -93,11 +94,14 @@ class TemplateSettings extends Settings
 
             if (!array_key_exists('fields', $template))
                 $template['fields'] = [];
+            if (!array_key_exists('variables', $template))
+                $template['variables'] = [];
             if (!array_key_exists('areas', $template))
                 $template['areas'] = [];
 
             //TODO: parse templates to Template objects
             self::getList('fields', $template, $fileInfo);
+            self::getDict('variables', $template, $fileInfo);
             self::getList('areas', $template, $fileInfo);
         }
     }

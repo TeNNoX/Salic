@@ -68,7 +68,8 @@ class PageSettings extends Settings
 
         return ['title' => ucfirst($this->pageKey),  // generate string via uppercasing first letter of pageKey
             'template' => 'default',
-            'areas' => $defaultAreas]; // the area names
+            'areas' => $defaultAreas,  // empty areas array
+            'variables' => []]; // emtpy variables array
     }
 
     public function parseFromJson($json)
@@ -83,6 +84,8 @@ class PageSettings extends Settings
             if (!is_array($blocks))
                 throw new SalicSettingsException("Blocklist for '$area' is not an array", $this->file . self::fis . "areas");
         }
+
+        $this->variables = self::getDict('variables', $json, []);
     }
 
     public function validate()
@@ -93,7 +96,8 @@ class PageSettings extends Settings
             throw new SalicSettingsException("Template '" . $this->template . "' not found", $this->file, $templateSettings->templates);
 
         // create empty areas that are not present
-        $templateAreas = $templateSettings->sub($this->template)['areas'];
+        $myTemplate = $templateSettings->sub($this->template);
+        $templateAreas = $myTemplate['areas'];
         foreach ($templateAreas as $area) {
             if (!array_key_exists($area, $this->areas))
                 $this->areas[$area] = [];
@@ -120,11 +124,26 @@ class PageSettings extends Settings
                 // TODO: check if block exists
             }
         }
+
+        // check variables list
+        $templateVars = $myTemplate['variables'];
+        foreach ($this->variables as $var => $value) {
+            // check if variable exists in template
+            if (!array_key_exists($var, $templateVars))
+                throw new SalicSettingsException("Variable '$var' doesn't exist in the template", $this->file . self::fis . 'variables');
+
+            //TODO: variable value type checking
+        }
     }
 
+
+    /**
+     * generate empty areas array from template
+     * @param string $template The template name, if not default
+     * @return array
+     */
     private function getDefaultAreas($template = 'default')
     {
-        // generate default areas from template
         $defaultAreas = array();
         foreach (TemplateSettings::data2($template)['areas'] as $area) {
             $defaultAreas[$area] = array(); // ['area1' => [], 'area2' => []]
