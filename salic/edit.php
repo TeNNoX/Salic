@@ -4,6 +4,10 @@ use Salic\Settings\LangSettings;
 
 require_once('Salic.php');
 
+if(!Utils::validAuthentication()) {
+    exit; // Utils should call exit(), but just to be sure...
+}
+
 if (!array_key_exists('page', $_GET) && !array_key_exists('lang', $_GET)) {
     // main backend page
     $salic = new SalicMng('en');

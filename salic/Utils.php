@@ -3,6 +3,7 @@
 namespace Salic;
 
 use Salic\Exception\SalicSettingsException;
+use Salic\Settings\GeneralSettings;
 use Salic\Settings\LangSettings;
 use Salic\Settings\NavSettings;
 use Salic\Settings\PageSettings;
@@ -12,6 +13,46 @@ require_once 'Settings/Settings.php';
 
 class Utils
 {
+
+    /**
+     * Checks if the request is authenticated, otherwise prompts to do that.
+     * Either sends some headers and exits, or returns true.
+     *
+     * But to be safe, always exit if this doesn't return true.
+     *
+     * @return bool If the authentication succeded (should only return true)
+     */
+    public static function validAuthentication()
+    {
+        try {
+            $message = "You have to log in to enter edit mode.";
+            if (isset($_SERVER['PHP_AUTH_USER'])) {
+                //echo "<p>Hello {}.</p>";
+                //echo "<p>You entered {} as your password.</p>";
+                //TODO: save auth?
+                $user = $_SERVER['PHP_AUTH_USER'];
+                $pw = $_SERVER['PHP_AUTH_PW'];
+                $hash = GeneralSettings::get()->passwordHash;
+
+                if ($user != "editor") {
+                    $message = "Wrong username.";
+                } else if (password_verify($pw, $hash)) {
+                    return true;
+                }
+            }
+
+            header('WWW-Authenticate: Basic realm="SaLiC edit mode"');
+            header('HTTP/1.0 401 Unauthorized');
+            echo $message . "<br>";
+            echo "<a href='javascript:window.location.reload()'>Retry</a><br>";
+            echo "<a href='/'>Go to the homepage</a><br>";
+            exit;
+        } catch (\Exception $e) {
+            echo "Excpetion while performing authentication:<br>";
+            echo $e->getMessage() . "<br><br><pre>" . $e->getTraceAsString() . "</pre>";
+            exit;
+        }
+    }
 
     /**
      * Parse the accepted languages from the HTTP Header, and return the preferred one, if available, otherwise the default.

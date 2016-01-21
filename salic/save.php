@@ -1,10 +1,13 @@
 <?php
 namespace Salic;
+
 use Salic\Settings\LangSettings;
 
 require_once('Salic.php');
 
-$page = $_GET['page'];
+if (!Utils::validAuthentication()) {
+    exit; // Utils should call exit(), but just to be sure...
+}
 
 $lang = strtolower($_GET['lang']);
 if (!LangSettings::get()->exists($lang)) {
@@ -14,6 +17,7 @@ if (!LangSettings::get()->exists($lang)) {
 
 $salic = new SalicMng($lang);
 
+$page = strtolower($_GET['page']);
 if (empty($page)) {
     die('pagekey not given');
 }
