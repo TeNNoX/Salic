@@ -11,13 +11,19 @@ class LangSettings extends Settings
     public $default;
     public $available;
 
+    /**
+     * @var self A cached instance of this, if available
+     */
     protected static $cached;
 
+    /**
+     * @return self A cached or fresh instance of this
+     */
     public static function get()
     {
         if (self::$cached)
             return self::$cached;
-        return new static();
+        return new self();
     }
 
     public function __construct()

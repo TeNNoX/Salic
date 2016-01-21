@@ -23,10 +23,22 @@ class PageSettings extends Settings
      */
     public $areas;
 
+    /**
+     * @var array The list of variables
+     */
+    public $variables;
+
     private $pageKey;
 
+    /**
+     * @var self Cached instances (in array by pagekey)
+     */
     protected static $cached;
 
+    /**
+     * @param string $pageKey The pagekey to get the settings for
+     * @return PageSettings A cached or fresh instance of the wanted settings object
+     */
     public static function get($pageKey)
     {
         if (!self::$cached)
@@ -34,7 +46,7 @@ class PageSettings extends Settings
 
         if (array_key_exists($pageKey, self::$cached))
             return self::$cached[$pageKey];
-        return new static($pageKey);
+        return new self($pageKey);
     }
 
     public function blocks($area)
@@ -91,7 +103,7 @@ class PageSettings extends Settings
         foreach ($this->areas as $areaKey => $blocks) {
             // check if area exists in template
             if (!in_array($areaKey, $templateAreas))
-                throw new SalicSettingsException("Area '$areaKey' doesn't exist in the template", $this->file . self::fis . "areas");
+                throw new SalicSettingsException("Area '$areaKey' doesn't exist in the template", $this->file . self::fis . 'areas');
 
             $blockKeys = array(); // for duplicate checking
 
@@ -114,7 +126,7 @@ class PageSettings extends Settings
     {
         // generate default areas from template
         $defaultAreas = array();
-        foreach (TemplateSettings::get()->sub($template)['areas'] as $area) {
+        foreach (TemplateSettings::data2($template)['areas'] as $area) {
             $defaultAreas[$area] = array(); // ['area1' => [], 'area2' => []]
         }
         return $defaultAreas;

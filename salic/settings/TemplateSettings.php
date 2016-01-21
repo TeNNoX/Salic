@@ -11,13 +11,19 @@ class TemplateSettings extends Settings
     public $default;
     public $templates;
 
+    /**
+     * @var self A cached instance of this, if available
+     */
     protected static $cached;
 
+    /**
+     * @return self A cached or fresh instance of this
+     */
     public static function get()
     {
         if (self::$cached)
             return self::$cached;
-        return new static();
+        return new self();
     }
 
     public function __construct()
@@ -26,14 +32,32 @@ class TemplateSettings extends Settings
         parent::__construct();
     }
 
-    public function sub($name)
+    /**
+     * @param string $name The template name
+     * @return array
+     */
+    public function data($name)
     {
         return $this->templates[$name];
+    }
+
+    /**
+     * @param string $name The template name
+     * @return array
+     */
+    public static function data2($name) // static version
+    {
+        return self::get()->templates[$name];
     }
 
     public function exists($name)
     {
         return array_key_exists($name, $this->templates);
+    }
+
+    public static function exists2($name) // static version
+    {
+        return array_key_exists($name, self::get()->templates);
     }
 
     public function getDefault()
