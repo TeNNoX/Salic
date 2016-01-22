@@ -11,6 +11,10 @@ class GeneralSettings extends Settings
 {
 
     public $passwordHash;
+    /**
+     * @var boolean
+     */
+    public $debugMode;
 
     /**
      * @var self A cached instance of this, if available
@@ -36,11 +40,15 @@ class GeneralSettings extends Settings
 
     public function getDefault()
     {
-        return ['password_hash' => '$2y$10$zIA615.W0w/mR5JgP7biCeSh3ORffzC1cHHSMflhKMOfQjS1Ukc6.'];
+        return [
+            'debug_mode' => false,
+            'password_hash' => '$2y$10$zIA615.W0w/mR5JgP7biCeSh3ORffzC1cHHSMflhKMOfQjS1Ukc6.'
+        ];
     }
 
     public function parseFromJson($json)
     {
+        $this->debugMode = self::getBoolean('debug_mode', $json, false);
         $this->passwordHash = self::getString('password_hash', $json, '$2y$10$zIA615.W0w/mR5JgP7biCeSh3ORffzC1cHHSMflhKMOfQjS1Ukc6.');
     }
 

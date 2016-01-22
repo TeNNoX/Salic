@@ -4,6 +4,7 @@ namespace Salic;
 
 use Salic\Exception\SalicException;
 use Salic\Exception\SalicSettingsException;
+use Salic\Settings\GeneralSettings;
 use Salic\Settings\PageSettings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
@@ -53,10 +54,11 @@ class Salic
         $loader->addPath(__DIR__ . '/template', 'salic');
 
         $this->twig = new Twig_Environment($loader, array(
-            /*'cache' => __DIR__ . '/compilation_cache', */ //TODO: enable twig caching
-            'auto_reload' => true,
-            'strict_variables' => true,
-            'autoescape' => false,
+            /*'cache' => __DIR__ . '/compilation_cache',  ?debug */ //TODO: enable twig caching
+            'auto_reload' => true, //TODO: disable some twig settings for performance
+            'strict_variables' => true, // TODO: configurable (for salic vars too)
+            'autoescape' => false, //TODO: autoescape variables?
+            'debug' => GeneralSettings::get()->debugMode,
         ));
 
         $this->twig->addFilter(new \Twig_SimpleFilter('get_class', 'get_class'));
@@ -200,6 +202,7 @@ class Salic
 
             $salicName = $area . "_" . $block['key'];
             $rendered .= $this->twig->render('blocks/' . $block['type'] . '.html.twig', array(
+                'debug_mode' => GeneralSettings::get()->debugMode,
                 'salic_name' => $salicName,
                 'content' => $content,
                 'vars' => $block['vars'],
@@ -226,6 +229,7 @@ class Salic
 
     protected function doRenderPage($templatefile, $vars)
     {
+        $vars['debug_mode'] = GeneralSettings::get()->debugMode;
         $vars['baseurl'] = $this->baseUrl;
         $vars['baseurl_international'] = $this->baseUrlInternational;
         $vars['nav_pages'] = Utils::getNavPageList($this->baseUrl, $this->current_lang);

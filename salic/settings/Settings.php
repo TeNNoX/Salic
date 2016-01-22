@@ -20,6 +20,7 @@ abstract class Settings
     {
         $json = self::parseOrCreate();
         $this->parseFromJson($json); //TODO: sanitize keys (eg. page names, languages, blockKeys, ...)
+        //TODO: warn about unrecognized setting keys
         $this->validate();
         static::$cached = $this; // store instance to cache
         //TODO: save sanitized version of settings?
@@ -31,6 +32,27 @@ abstract class Settings
 
     public abstract function validate();
 
+
+    /**
+     * Assert that $key exists in $array, and is a boolean.
+     *
+     * @param string $key The key to check for in the array
+     * @param array $array The array what should be checked
+     * @param string $default The default value, if not given. If this is null, an exception is thrown.
+     * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
+     * @return boolean The value
+     * @throws SalicSettingsException If empty and no $default is given, or the existing value is not a string
+     */
+    protected function getBoolean($key, array $array, $default = null, $extraFileInfo = "")
+    {
+        $fileInfo = $this->file . ($extraFileInfo ? self::fis . $extraFileInfo : '');
+        $value = self::getKey($key, $array, $default, $fileInfo);
+
+        /*if (!is_boolean($value))
+            throw new SalicSettingsException("Key '$key' is not a boolean", $fileInfo);*/
+
+        return $value === true || $value === 1; // 1 is also allowed
+    }
 
     /**
      * Assert that $key exists in $array, and is a string.
