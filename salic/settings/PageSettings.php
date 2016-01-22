@@ -104,15 +104,15 @@ class PageSettings extends Settings
         }
 
         // check blocks list
-        foreach ($this->areas as $areaKey => $blocks) {
+        foreach ($this->areas as $areaKey => &$blocks) {
             // check if area exists in template
             if (!in_array($areaKey, $templateAreas))
                 throw new SalicSettingsException("Area '$areaKey' doesn't exist in the template", $this->file . self::fis . 'areas');
 
             $blockKeys = array(); // for duplicate checking
 
-            foreach ($blocks as $i => $block) { // check all blocks
-                self::getString('key', $block, $this->file . "areas>$areaKey>$i"); // use index, blockKey is not known yet
+            foreach ($blocks as $i => &$block) { // check all blocks
+                $block['key'] = self::getString('key', $block, null, "areas>$areaKey>$i"); // use index, blockKey is not known yet
 
                 // check for duplicate keys
                 $blockKey = $block['key'];
@@ -120,8 +120,11 @@ class PageSettings extends Settings
                     throw new SalicSettingsException("Duplicate block blockKey '$blockKey'", $this->file . self::fis . "areas>$areaKey");
                 $blockKeys[] = $blockKey;
 
-                self::getString('type', $block, "areas>$areaKey>$blockKey"); // eg. 'templates.json:areas>main>intro'
+                $block['type'] = self::getString('type', $block, null, "areas>$areaKey>$blockKey"); // eg. 'templates.json:areas>main>intro'
                 // TODO: check if block exists
+
+                // set to parsed value
+                $block['vars'] = self::getDict('vars', $block, [], "areas>$areaKey>$blockKey");
             }
         }
 

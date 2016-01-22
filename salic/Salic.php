@@ -202,6 +202,7 @@ class Salic
             $rendered .= $this->twig->render('blocks/' . $block['type'] . '.html.twig', array(
                 'salic_name' => $salicName,
                 'content' => $content,
+                'vars' => $block['vars'],
             ));
         }
         return $rendered;

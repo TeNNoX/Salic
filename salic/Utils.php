@@ -98,6 +98,7 @@ class Utils
         $nav_array = array();
         $pages = $navSettings->displayed;
         $external = $navSettings->external_links;
+
         foreach ($pages as $key) {
             $title = PageSettings::get($key)->title->get($lang);
             $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key);
