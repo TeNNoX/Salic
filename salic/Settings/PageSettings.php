@@ -121,7 +121,8 @@ class PageSettings extends Settings
                 $blockKeys[] = $blockKey;
 
                 $block['type'] = self::getString('type', $block, null, "areas>$areaKey>$blockKey"); // eg. 'templates.json:areas>main>intro'
-                // TODO: check if block exists
+                if (!BlockSettings::exists2($block['type']))
+                    throw new SalicSettingsException("Block '{$block['type']}' is not defined in blocks.json", $this->file . self::fis . "areas>$areaKey>$blockKey");
 
                 // set to parsed value
                 $block['vars'] = self::getDict('vars', $block, [], "areas>$areaKey>$blockKey");

@@ -185,7 +185,7 @@ abstract class Settings
         $raw = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t](//).*)#", '', $raw);
 
         $json = json_decode($raw, true);
-        if (!$json || json_last_error() !== JSON_ERROR_NONE)
+        if (!is_array($json) || json_last_error() !== JSON_ERROR_NONE)
             throw new SalicSettingsException("Unable to parse: " . json_last_error_msg(), $filepath);
         return $json;
     }

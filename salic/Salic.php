@@ -4,12 +4,13 @@ namespace Salic;
 
 use Salic\Exception\SalicException;
 use Salic\Exception\SalicSettingsException;
+use Salic\Settings\BlockSettings;
 use Salic\Settings\GeneralSettings;
 use Salic\Settings\PageSettings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
-$loader = require(__DIR__ . '/../vendor/autoload.php');
+require(__DIR__ . '/../vendor/autoload.php');
 
 /**
  * SaLiC = Sassy Little CMS
@@ -20,9 +21,13 @@ class Salic
     const defaultTemplate = 'default';
     const errorTemplate = '@salic/error.html.twig';
     const dataFileExtension = '.html';
+    const templateExtension = '.html.twig';
 
     protected $baseUrl; // baseUrls are not constants, because correctly overriding them is a bit... 'straightsideways' :P
     protected $baseUrlInternational;
+    /**
+     * @var Twig_Environment
+     */
     protected $twig;
     protected $current_lang;
 
@@ -164,9 +169,9 @@ class Salic
      * if it fails AND $default is not set.
      *
      * @param string $var
+     * @param $defaultVal
      * @param string $pagekey
      * @return mixed The value
-     * @throws SalicException If it fails
      */
     public function loadVar($var, $defaultVal, $pagekey)
     {
@@ -197,18 +202,30 @@ class Salic
         // fetch all blocks for this area
         foreach ($blocks as $block) {
             $file = "site/data/$pagekey/$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
-            // default to empty content
-            $content = is_file($file) ? file_get_contents($file) : '';
-
             $salicName = $area . "_" . $block['key'];
-            $rendered .= $this->twig->render('blocks/' . $block['type'] . '.html.twig', array(
-                'debug_mode' => GeneralSettings::get()->debugMode,
-                'salic_name' => $salicName,
-                'content' => $content,
-                'vars' => $block['vars'],
-            ));
+
+            $rendered .= $this->loadBlock($file, $block, $salicName);
         }
         return $rendered;
+    }
+
+    private function loadBlock($file, $block, $salicName)
+    {
+        // default to empty content
+        $blockSettings = BlockSettings::data2($block['type']);
+
+        $vars = $blockSettings['vars'];
+        foreach ($block['vars'] as $var => $val) {
+            $vars[$var] = $val;
+        }
+
+        $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt;' . $block['key'] . '&gt;</i></p>'; //TODO: ?block id as default content
+        return $this->twig->render('blocks/' . $block['type'] . self::templateExtension, array(
+            'debug_mode' => GeneralSettings::get()->debugMode,
+            'salic_name' => $salicName,
+            'content' => $content,
+            'vars' => $vars,
+        ));
     }
 
     /**

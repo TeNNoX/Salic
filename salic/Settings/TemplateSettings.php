@@ -3,6 +3,7 @@
 namespace Salic\Settings;
 
 use Salic\Exception\SalicSettingsException;
+use Salic\Salic;
 
 
 class TemplateSettings extends Settings
@@ -87,23 +88,16 @@ class TemplateSettings extends Settings
         }
 
         foreach ($this->templates as $name => &$template) {
-            $fileInfo = $this->file . $name;  // fileInfo is e.g. 'templates.json:default'
+            $extraInfo = $name;  // fileInfo is e.g. 'templates.json:default'
 
-            self::getString('file', $template, null, $fileInfo);
+            $template['file'] = self::getString('file', $template, $name . Salic::templateExtension, $extraInfo); //default = eg. 'templatename.html.twig'
             // TODO: check if template file exists
-
-            if (!array_key_exists('fields', $template))
-                $template['fields'] = [];
-            if (!array_key_exists('variables', $template))
-                $template['variables'] = [];
-            if (!array_key_exists('areas', $template))
-                $template['areas'] = [];
 
             //TODO: parse templates to Template objects
             //TODO: sanitize var/field/area/block names (no underscore?, no dot, ...)
-            self::getList('fields', $template, $fileInfo);
-            self::getDict('variables', $template, $fileInfo);
-            self::getList('areas', $template, $fileInfo);
+            $template['fields'] = self::getList('fields', $template, [], $extraInfo);
+            $template['variables'] = self::getDict('variables', $template, [], $extraInfo);
+            $template['areas'] = self::getList('areas', $template, [], $extraInfo);
         }
     }
 }
