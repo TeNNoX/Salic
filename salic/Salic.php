@@ -220,12 +220,16 @@ class Salic
         }
 
         $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt;' . $block['key'] . '&gt;</i></p>'; //TODO: ?block id as default content
-        return $this->twig->render('blocks/' . $block['type'] . self::templateExtension, array(
+
+        $data = array(
             'debug_mode' => GeneralSettings::get()->debugMode,
-            'salic_name' => $salicName,
             'content' => $content,
             'vars' => $vars,
-        ));
+        );
+        if ($blockSettings['editable'])
+            $data['salic_name'] = $salicName; // only add salic name if editable
+
+        return $this->twig->render('blocks/' . $block['type'] . self::templateExtension, $data);
     }
 
     /**

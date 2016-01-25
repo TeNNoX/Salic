@@ -7,6 +7,8 @@ $(function () {
     var editor = ContentTools.EditorApp.get();
     editor.init('*[data-salic-name]', 'data-salic-name');
 
+    //TODO: add translations to editor
+
     // HANDLE IMAGE UPLOADS
     function imageUploader(dialog) {
         var image, xhr, xhrComplete, xhrProgress;

@@ -83,6 +83,8 @@ class BlockSettings extends Settings
             $block['file'] = self::getString('file', $block, $type . Salic::templateExtension, $extraInfo);
             // TODO: check if blocktype file exists
 
+            $block['editable'] = self::getBoolean('editable', $block, true, $extraInfo);
+
             //TODO: parse blocks to Block objects
             //TODO: sanitize var names (no underscore?, no dot, ...)
             $block['vars'] = self::getDict('vars', $block, [], $extraInfo);

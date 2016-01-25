@@ -74,6 +74,9 @@ class SalicMng extends Salic //TODO: implement backend
             if (preg_match('/^([A-z0-9_-])+$/', $key) !== 1) {
                 throw new \Exception("Invalid key: '$key'");
             }
+            //TODO: check if field/area/block is valid
+            //TODO: check if block is editable
+
             $filename = $key . "_" . $this->current_lang . self::dataFileExtension; // save as 'pagekey_lang.ext'
             $flag = file_put_contents($page_dir . $filename, $val, LOCK_EX); // lock the file exclusively while writing
             if ($flag === false) {
