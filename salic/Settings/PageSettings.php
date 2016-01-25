@@ -117,7 +117,7 @@ class PageSettings extends Settings
                 // check for duplicate keys
                 $blockKey = $block['key'];
                 if (in_array($blockKey, $blockKeys))
-                    throw new SalicSettingsException("Duplicate block blockKey '$blockKey'", $this->file . self::fis . "areas>$areaKey");
+                    throw new SalicSettingsException("Duplicate blockKey '$blockKey'", $this->file . self::fis . "areas>$areaKey");
                 $blockKeys[] = $blockKey;
 
                 $block['type'] = self::getString('type', $block, null, "areas>$areaKey>$blockKey"); // eg. 'templates.json:areas>main>intro'
