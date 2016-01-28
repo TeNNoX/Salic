@@ -23,9 +23,10 @@ class SalicMng extends Salic //TODO: implement backend
 
     public function renderBackend()
     { //TODO: implement/fix backend
-        $this->doRenderPage($this->mainEditTemplate, array(
+        echo "<h1>Imagine a backend over here.</h1>";
+        /*$this->doRenderPage($this->mainEditTemplate, array(
             'pages' => Settings\NavSettings::get()->displayed,
-        ));
+        ));*/
     }
 
     protected function doRenderPage($templatefile, $vars)

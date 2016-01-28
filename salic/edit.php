@@ -8,6 +8,7 @@ if(!Utils::validAuthentication()) {
     exit; // Utils should call exit(), but just to be sure...
 }
 
+// for just /edit/, render the backend.
 if (!array_key_exists('page', $_GET) && !array_key_exists('lang', $_GET)) {
     // main backend page
     $salic = new SalicMng('en');

@@ -5,7 +5,7 @@ namespace Salic\Exception;
 class SalicSettingsException extends \Exception
 {
     public $fileInfo;
-    public $data; // some kind of json-encodable object for debugging purposes, TODO: use it.
+    public $data; // some kind of json-encodable object for debugging purposes
 
     public function __construct($message, $fileInfo, $data = null)
     {
