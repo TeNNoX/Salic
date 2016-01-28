@@ -2,6 +2,8 @@
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
+  # /static/img/*.jpg
+  RewriteRule ^static/img/(.+)\.jpg$ img_steward.php?img_path=$1.jpg [END,QSA]
   # /static/...
   RewriteRule ^static/(.+)$ site/static/$1 [END]
   # /salic/static/...
