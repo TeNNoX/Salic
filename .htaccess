@@ -7,17 +7,21 @@
   # /salic/static/...
   RewriteRule ^salic/static/(.+)$ salic/static/$1 [END]
 
-  # /edit/lang/XYZ/save
-  RewriteRule ^edit/([A-z_-]+)/([^/]*)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
-  # /edit/lang/XYZ[/]
-  RewriteRule ^edit/([A-z_-]+)/([^/]*)/?$ edit.php?lang=$1&page=$2 [END,QSD]
+  # /edit/lang/.../save[/]
+  RewriteRule ^edit/([A-z_-]+)/(.*)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
+  # /edit/lang/...[/]
+  RewriteRule ^edit/([A-z_-]+)/(.*)/?$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
   # /edit/XYZ[/]
-  RewriteRule ^edit/([^/]*)/?$ edit.php?lang=en&page=$2 [END,QSD] # select default language
+  #RewriteRule ^edit/([^/]*)/?$ edit.php?page=$2 [END,QSD] -> TODO:? 'no language'-link support
+  # /edit/
+  RewriteRule ^edit/?$ edit.php [END,QSD]
 
-  # /en/XYZ[/]
-  RewriteRule ^([A-z_-]+)/([^/]*)/?$ index.php?lang=$1&page=$2 [END,QSD]
+  # /en/...[/]
+  RewriteRule ^([A-z_-]+)/(.*)/?$ index.php?lang=$1&page=$2 [END,QSD]
   # /XYZ
-  RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
+  #RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
+  # /
+  RewriteRule ^$ index.php [END,QSD]
 
   # EVERYTHING ELSE
   RewriteRule .* index.php?page=404 [END,QSD]
