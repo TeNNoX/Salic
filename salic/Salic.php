@@ -7,6 +7,7 @@ use Salic\Exception\SalicSettingsException;
 use Salic\Settings\BlockSettings;
 use Salic\Settings\GeneralSettings;
 use Salic\Settings\PageSettings;
+use Salic\Settings\TemplateSettings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -18,10 +19,10 @@ require(__DIR__ . '/../vendor/autoload.php');
  */
 class Salic
 {
-    const defaultTemplate = 'default';
     const errorTemplate = '@salic/error.html.twig';
     const dataFileExtension = '.html';
     const templateExtension = '.html.twig';
+    const defaultTemplateName = 'default';
 
     protected $baseUrl; // baseUrls are not constants, because correctly overriding them is a bit... 'straightsideways' :P
     protected $baseUrlInternational;
@@ -101,8 +102,9 @@ class Salic
         try {
             http_response_code(404);
 
-            $data = $this->loadData('404', self::defaultTemplate);
-            $this->doRenderPage(self::defaultTemplate, $data);
+            $defaultTemplate = TemplateSettings::data2(self::defaultTemplateName);
+            $data = $this->loadData('404', $defaultTemplate);
+            $this->doRenderPage($defaultTemplate['file'], $data);
         } catch (\Exception $e) {
             $this->renderError($e, "rendering 404");
         }
