@@ -24,6 +24,13 @@ class ImgSteward
         $full_src_path = self::src_path . $img_path;
         $full_cache_path = self::cachePath($img_path, $width);
 
+        if(!extension_loaded('gd') || !function_exists('gd_info')) {
+            if (self::debug)
+                echo "GD library not available :/<br>Serving original<br>";
+            self::serve_file($full_src_path);
+            return;
+        }
+
         // get source image dimensions
         list($src_width, $src_height) = getimagesize($full_src_path);
         if (self::debug)
@@ -31,8 +38,9 @@ class ImgSteward
 
         if ($src_width <= $width || $width == null) { // it's unnecessary to generate it, if the source is sufficient
             if (self::debug)
-                echo "Serving original, it's sufficient for the requested width($width)";
+                echo "Serving original, it's sufficient for the requested width($width)<br>";
             self::serve_file($full_src_path);
+            return;
         } else {
             if (!is_file($full_cache_path)) { // no cached file? generate it!
                 $height = ($src_height / $src_width) * $width;
