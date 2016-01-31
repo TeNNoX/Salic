@@ -28,7 +28,7 @@ class BlockSettings extends Settings
 
     public function __construct()
     {
-        $this->file = 'template/blocks/blocks.json';
+        $this->file = 'template/blocks.json';
         parent::__construct();
     }
 
