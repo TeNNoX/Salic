@@ -38,7 +38,7 @@ abstract class Settings
      *
      * @param string $key The key to check for in the array
      * @param array $array The array what should be checked
-     * @param string $default The default value, if not given. If this is null, an exception is thrown.
+     * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
      * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
      * @return boolean The value
      * @throws SalicSettingsException If empty and no $default is given, or the existing value is not a string
@@ -48,7 +48,7 @@ abstract class Settings
         $fileInfo = $this->file . ($extraFileInfo ? self::fis . $extraFileInfo : '');
         $value = self::getKey($key, $array, $default, $fileInfo);
 
-        /*if (!is_boolean($value))
+        /*if (!is_boolean($value)) TODO: boolean settings
             throw new SalicSettingsException("Key '$key' is not a boolean", $fileInfo);*/
 
         return $value === true || $value === 1; // 1 is also allowed
@@ -59,7 +59,7 @@ abstract class Settings
      *
      * @param string $key The key to check for in the array
      * @param array $array The array what should be checked
-     * @param string $default The default value, if not given. If this is null, an exception is thrown.
+     * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
      * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
      * @param string $pattern Optional regex to check proper format
      * @return string The value
@@ -81,7 +81,7 @@ abstract class Settings
     /**
      * @param $key - the key to check for in the array
      * @param array $array - the array what should be checked
-     * @param string $default The default value, if not given. If this is null, an exception is thrown.
+     * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
      * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
      * @return array The value
      * @throws SalicSettingsException - if assert fails
@@ -101,7 +101,7 @@ abstract class Settings
     /**
      * @param $key - the key to check for in the array
      * @param array $array - the array what should be checked
-     * @param string $default The default value, if not given. If this is null, an exception is thrown.
+     * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
      * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
      * @return array The value
      * @throws SalicSettingsException - if assert fails
@@ -124,7 +124,7 @@ abstract class Settings
      *
      * @param string $key The key to check for in the array
      * @param array $array The array what should be checked
-     * @param string $default The default value, if not given. If this is null, an exception is thrown.
+     * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
      * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
      * @param string $pattern Optional regex to check proper format
      * @return TranslatedString The value

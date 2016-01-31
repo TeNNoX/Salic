@@ -92,7 +92,7 @@ class Utils
      * @return array
      * @throws SalicSettingsException
      */
-    public static function getNavPageList($baseUrl, $lang) // = general page settings
+    public static function getNavPageList($baseUrl, $lang)
     {
         $navSettings = NavSettings::get();
         $nav_array = array();
@@ -100,7 +100,7 @@ class Utils
         $external = $navSettings->external_links;
 
         foreach ($pages as $key) {
-            $title = PageSettings::get($key)->title->get($lang);
+            $title = PageSettings::get($key)->title->get($lang); //TODO: what to do about titles for external pages
             $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key);
             $nav_array[$key] = array(
                 'title' => $title,
