@@ -65,8 +65,9 @@ class PageSettings extends Settings
     public function getDefault()
     {
         $defaultAreas = $this->getDefaultAreas();
+        $defaultTitle = ucfirst(end(explode('/', $this->pageKey))); // generate string via uppercasing first letter of pageKey: '[page1/]page2' => 'Page2'
 
-        return ['title' => ucfirst($this->pageKey),  // generate string via uppercasing first letter of pageKey
+        return ['title' => $defaultTitle,
             'template' => 'default',
             'areas' => $defaultAreas,  // empty areas array
             'variables' => []]; // emtpy variables array
@@ -124,7 +125,7 @@ class PageSettings extends Settings
                 if (!BlockSettings::exists2($block['type']))
                     throw new SalicSettingsException("Block '{$block['type']}' is not defined in blocks.json", $this->file . self::fis . "areas>$areaKey>$blockKey");
 
-                // set to parsed value
+                // set to parsed value, TODO: move stuff like this to parseFromJson()
                 $block['vars'] = self::getDict('vars', $block, [], "areas>$areaKey>$blockKey");
             }
         }
@@ -153,5 +154,14 @@ class PageSettings extends Settings
             $defaultAreas[$area] = array(); // ['area1' => [], 'area2' => []]
         }
         return $defaultAreas;
+    }
+
+    public static function getBlock($blocks, $key)
+    {
+        foreach ($blocks as $block) {
+            if ($block['key'] == $key)
+                return $block;
+        }
+        return null;
     }
 }

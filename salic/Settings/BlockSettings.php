@@ -85,6 +85,8 @@ class BlockSettings extends Settings
 
             $block['editable'] = self::getBoolean('editable', $block, true, $extraInfo);
 
+            $block['subblocks'] = self::getList('subblocks', $block, [], $extraInfo);
+
             //TODO: parse blocks to Block objects
             //TODO: sanitize var names (no underscore?, no dot, ...)
             $block['vars'] = self::getDict('vars', $block, [], $extraInfo);

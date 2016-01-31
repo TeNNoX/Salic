@@ -140,4 +140,9 @@ class Utils
     {
         return is_dir(Settings::baseDir . "data/$pagekey");
     }
+
+    public static function endsWith($haystack, $needle)
+    {
+        return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+    }
 }

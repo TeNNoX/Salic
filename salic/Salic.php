@@ -203,27 +203,43 @@ class Salic
 
         // fetch all blocks for this area
         foreach ($blocks as $block) {
-            $file = "site/data/$pagekey/$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
+            $pageDir = "site/data/$pagekey/";//$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
             $salicName = $area . "_" . $block['key'];
 
-            $rendered .= $this->loadBlock($file, $block, $salicName);
+            $rendered .= $this->loadBlock($pageDir, $block, $salicName);
         }
         return $rendered;
     }
 
-    private function loadBlock($file, $block, $salicName)
+    private function loadBlock($pageDir, $block, $salicName)
     {
-        // default to empty content
         $blockSettings = BlockSettings::data2($block['type']);
+
+        if (!$blockSettings['subblocks']) {
+            // default content: '<blockkey>'
+            $file = $pageDir . $salicName . "_" . $this->current_lang . self::dataFileExtension;
+            $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt; ' . $block['key'] . ' &gt;</i></p>'; //TODO: ?block id as default content
+        } else { // subblock = each file, eg. main_blockname_en/left.html.twig, gets loaded into $content['left']
+            $dir = $pageDir . $salicName . '/';
+            $content = array();
+
+            if (is_dir($dir)) {
+                foreach ($blockSettings['subblocks'] as $subblock) {
+                    $filename = $dir . $subblock . "_" . $this->current_lang . self::dataFileExtension;
+                    $subcontent = is_file($filename) ? file_get_contents($filename) : '<p><i>&lt; ' . $block['key'] . '.' . $subblock . ' &gt;</i></p>';
+                    $content[$subblock] = $subcontent;
+                }
+            }
+        }
 
         $vars = $blockSettings['vars'];
         foreach ($block['vars'] as $var => $val) {
             $vars[$var] = $val;
         }
 
-        $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt;' . $block['key'] . '&gt;</i></p>'; //TODO: ?block id as default content
-
         $data = array(
+            'baseurl' => $this->baseUrl,
+            'baseurl_international' => $this->baseUrlInternational,
             'debug_mode' => GeneralSettings::get()->debugMode,
             'content' => $content,
             'vars' => $vars,
