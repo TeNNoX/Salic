@@ -33,11 +33,12 @@ After setting up the website, **editors can perform Additions/Modifications of c
 - Template blocks + subblocks
 - **Adaptive images (via srcset, automatically generated)**
 
-### Planned:
-- Configuration Backend (WIP)
+### Planned/WIP:
+- Configuration Backend
 - generation of sitemap.xml
 - automatic HTML/CSS/JS compression (optional of course)
 - Image uploads in ContentTools
+- Use browser caching
 
 .
 
