@@ -1,24 +1,43 @@
 # SaLi CMS a.k.a. 'SaLiC'
 **Sa**ssy **Li**ttle **C**MS - a simple lightweight PHP CMS
 
-### Status:
-This is at the moment in active developement, but I am not sure if the result will ever be a completely usable software for non-developers, like it could be.
+This is at the moment in active developement, but I am not sure if the result will ever be a complete, usable software for non-developers - although I would love to get to that point.
 
-It is **not ready to be installed**, yet.
+It is **not ready for use**, yet.
 
 .
 
-## The philosophy
+## The Philosophy
 I want this CMS to be the following:
 - **simplistic**
-- **fast** (I'm developing on a Raspberry Pi)
+- **fast** (Mine is running on a Raspberry Pi)
 - as **easy and straight-forward** as possible for content editors (That's why ContentTools is perfect for it)
-- working without extra software (only PHP and composer libraries)
+- working without extra software (only PHP + included libraries)
+- **flexible** (you can freely choose what features to use in the template, nothing is static)
 
 It is designed mostly for simple websites (navigation and content). But will also be flexible for mildly complex pages.
-I will probably also add possibilities to extend it with custom controllers/widgets/page elements.
+I will probably also add possibilities to extend it with custom controllers/widgets.
 
-But mainly it is designed for people like me, who know web developement, but don't want to be called every time the client wants to change something on the page. ;)
+But it is mainly designed like this:
+After setting up the website, **editors can perform Additions/Modifications of content mostly without a web developer**, and **without much introduction or learning required**.
+
+.
+
+## The Status
+### Implemented features:
+- Basic functionality
+- Edit mode
+- **Multi-language support**
+- nice URLs (via mod_rewrite)
+- subpages
+- Template blocks + subblocks
+- **Adaptive images (via srcset, automatically generated)**
+
+### Planned:
+- Configuration Backend (WIP)
+- generation of sitemap.xml
+- automatic HTML/CSS/JS compression (optional of course)
+- Image uploads in ContentTools
 
 .
 
@@ -26,7 +45,20 @@ But mainly it is designed for people like me, who know web developement, but don
 It is the result of throwing **[ContentTools](http://getcontenttools.com/)** and **[Twig](http://twig.sensiolabs.org/)** together, dreaming, coding, and finally applying some magic.
 (The part with the magic is still in the future.)
 
-It runs without any databse or extra software other than PHP (and a small .htaccess UrlRewrite).
-Most configuration stuff can be done via the Backend UI (which is very simple to use), or via the *config.ini* and *pages.json*.
-All data is stored in **data/**.
-All custom templates are stored in **templates/** (salic has a few of it's own)
+It runs without any database or extra software other than Apache and PHP (and a few RewriteRules).
+Most stuff will be configurable via the Backend UI (which is very simple to use), or *via some JSON files*.
+
+### Directory structure
+- **cache/** - Stores eg. generated images
+- **salic/** - Most salic-related stuff is in here
+- **site/** - Everything specific to this website
+  - **data/** - The content, stored in a page-based directory structure
+  - **static/** - CSS, JS, images, fonts...
+  - **template/** - The template files
+    - **blocks/** - Block templates
+    - ***blocks.json*** - Configuration of blocks
+  - ***general.json*** - General settings
+  - ***templates.json*** - Define templates, fields, blocks
+  - ***[navigation.json]*** - You can also handle that yourself
+  - ***[languages.json]*** - If the site is available in multiple languages
+- ***.htaccess*** - Holds a few RewriteRules, which can be transfered to your apache config
