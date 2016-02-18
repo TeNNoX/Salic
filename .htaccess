@@ -2,24 +2,30 @@
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
-  # /static/img/*.jpg
+  # /static/img/*.jpg -> ImgSteward
   RewriteRule ^static/img/(.+)\.jpg$ img_steward.php?img_path=$1.jpg [END,QSA]
   # /static/...
   RewriteRule ^static/(.+)$ site/static/$1 [END]
   # /salic/static/...
   RewriteRule ^salic/static/(.+)$ salic/static/$1 [END]
 
-  # /edit/lang/.../save[/]
-  RewriteRule ^edit/([A-z_-]+)/(.*)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
-  # /edit/lang/...[/]
-  RewriteRule ^edit/([A-z_-]+)/(.*)/?$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
-  # /edit/XYZ[/]
-  #RewriteRule ^edit/([^/]*)/?$ edit.php?page=$2 [END,QSD] -> TODO:? 'no language'-link support
-  # /edit/
-  RewriteRule ^edit/?$ edit.php [END,QSD]
+  # Force trailing slash
+  # condition: no trailing slash, no extension and not homepage (http://www.bla.de/)
+  RewriteCond %{REQUEST_URI} !(/$|\.[^/]*$|^$)
+  RewriteRule (.*) %{REQUEST_URI}/ [R=301,END]
 
-  # /en/...[/]
-  RewriteRule ^([A-z_-]+)/(.*)/?$ index.php?lang=$1&page=$2 [END,QSD]
+
+  # /edit/lang/.../save/
+  RewriteRule ^edit/([A-z_-]+)/(.*)/save/$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
+  # /edit/lang/.../
+  RewriteRule ^edit/([A-z_-]+)/(.*)/$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
+  # /edit/XYZ/
+  #RewriteRule ^edit/([^/]*)/$ edit.php?page=$2 [END,QSD] -> TODO:? 'no language'-link support
+  # /edit/
+  RewriteRule ^edit/$ edit.php [END,QSD]
+
+  # /en/.../
+  RewriteRule ^([A-z_-]+)/(.*)/$ index.php?lang=$1&page=$2 [END,QSD]
   # /XYZ
   #RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
   # /
