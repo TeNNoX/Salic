@@ -1,16 +1,18 @@
 <?php
 
-namespace salic;
+namespace Salic;
+
+use Salic\Settings\LangSettings;
 
 require_once 'test.php';
 
 function test_language_detection()
 {
     echo "<b>Your header:</b> ".$_SERVER["HTTP_ACCEPT_LANGUAGE"];
-    $lang_settings = Settings::getLangSettings();
+    $lang_settings = LangSettings::get();
 
-    $default = $lang_settings['default'];
-    $available = array_keys($lang_settings['available']);
+    $default = $lang_settings->default;
+    $available = array_keys($lang_settings->available);
 
     require_once 'salic/LanguageDetection.php';
 

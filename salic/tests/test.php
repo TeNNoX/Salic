@@ -1,10 +1,9 @@
 <?php
 
-namespace salic;
+namespace Salic;
 
-chdir('../../');
+chdir('../../'); // Go to root folder
 
-require_once 'salic/Utils.php';
-require_once 'salic/Settings.php';
+require('/vendor/autoload.php');
 
 ?>

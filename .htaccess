@@ -3,7 +3,8 @@
   RewriteEngine on
 
   # TESTS
-  RewriteRule ^tests/(.+)$ salic/tests/test_$1.php [END]
+  RewriteRule ^tests/?$ salic/tests/overview.php [END]
+  RewriteRule ^tests/(.+)/$ salic/tests/test_$1.php [END]
 
   # /static/img/*.jpg -> ImgSteward
   RewriteRule ^static/img/(.+)\.jpg$ img_steward.php?img_path=$1.jpg [END,QSA]
