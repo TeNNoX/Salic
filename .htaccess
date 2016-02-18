@@ -25,7 +25,7 @@
   RewriteRule ^edit/$ edit.php [END,QSD]
 
   # /en/.../
-  RewriteRule ^([A-z_-]+)/(.*)/$ index.php?lang=$1&page=$2 [END,QSD]
+  RewriteRule ^([A-z_-]+)/(?:(.+)/)?$ index.php?lang=$1&page=$2 [END,QSD]
   # /XYZ
   #RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
   # /
