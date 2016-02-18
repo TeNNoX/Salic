@@ -1,27 +1,35 @@
 <?php
 
-namespace salic;
+namespace Salic;
+
+use Salic\Exception\SalicException;
+use Salic\Exception\SalicSettingsException;
+use Salic\Settings\BlockSettings;
+use Salic\Settings\GeneralSettings;
+use Salic\Settings\PageSettings;
+use Salic\Settings\TemplateSettings;
+use Twig_Environment;
+use Twig_Loader_Filesystem;
 
 require(__DIR__ . '/../vendor/autoload.php');
-require_once('Exceptions.php');
-require_once('Utils.php');
-require_once('SalicMng.php');
 
 /**
  * SaLiC = Sassy Little CMS
+ *  by TeNNoX
  */
 class Salic
 {
-    public $templates;
+    const errorTemplate = '@salic/error.html.twig';
+    const dataFileExtension = '.html';
+    const templateExtension = '.html.twig';
+    const defaultTemplateName = 'default';
+
+    protected $baseUrl; // baseUrls are not constants, because correctly overriding them is a bit... 'straightsideways' :P
+    protected $baseUrlInternational;
+    /**
+     * @var Twig_Environment
+     */
     protected $twig;
-
-    protected $defaultTemplate = 'default';
-    protected $template404 = '404.html.twig';
-    protected $errorTemplate = '@salic/error.html.twig';
-    protected $baseUrl;
-    protected $baseUrlInternational = '/';
-    protected $dataFileExtension = '.html';
-
     protected $current_lang;
 
     /**
@@ -35,60 +43,57 @@ class Salic
         $this->baseUrl = $this->baseUrlInternational . "$lang/";
     }
 
-    public function loadTemplates()
+    public function getTemplate($name, $pageinfo = "") // pageinfo will be added to exception message
     {
-        if (!isset($this->templates)) // only if not already loaded
-            $this->templates = json_decode(file_get_contents('site/templates.json'), true);
-    }
-
-    public function getPageSettings()
-    {
-        return Settings::getPageSettings($this->baseUrl, $this->defaultTemplate); // for generation of href values
+        $templateSettings = Settings\TemplateSettings::get();
+        if (!$templateSettings->exists($name)) {
+            if (!empty($pageinfo)) // format it, or leave it empty
+                $pageinfo = " (page=$pageinfo)";
+            throw new SalicException("Template '$name' not found in templates.json" . $pageinfo);
+        }
+        return $templateSettings->data($name);
     }
 
     public function initTwig()
     {
-        $loader = new \Twig_Loader_Filesystem('site/template');    // look into main templates first
+        $loader = new Twig_Loader_Filesystem('site/template');    // look into main templates first
         $loader->addPath(__DIR__ . '/template', 'salic');
 
-        $this->twig = new \Twig_Environment($loader, array(
-            /*'cache' => __DIR__ . '/compilation_cache', */ //TODO: enable twig caching
-            'auto_reload' => true,
-            'strict_variables' => true,
-            'autoescape' => false,
+        $this->twig = new Twig_Environment($loader, array(
+            /*'cache' => __DIR__ . '/compilation_cache',  ?debug */ //TODO: enable twig caching
+            'auto_reload' => true, //TODO: disable some twig settings for performance
+            'strict_variables' => true, // TODO: configurable (for salic vars too)
+            'autoescape' => false, //TODO: autoescape variables?
+            'debug' => GeneralSettings::get()->debugMode,
         ));
+
+        $this->twig->addFilter(new \Twig_SimpleFilter('get_class', 'get_class'));
+        $this->twig->addFilter(new \Twig_SimpleFilter('var_export', 'var_export'));
+        $this->twig->addTest(new \Twig_SimpleTest('SettingsException', function ($value) {
+            return $value instanceof SalicSettingsException;
+        }));
     }
 
     public function renderPage($pagekey)
     {
         try {
-            $pages = $this->getPageSettings()['available'];
-            if (!array_key_exists($pagekey, $pages)) { // when querying an invalid page, go back to home TODO: 404 page
+            if (!Utils::pageExists($pagekey)) { // when querying an invalid page, go to 404
                 $this->render404();
                 return;
             }
 
             // load template and field data
-            $this->loadTemplates();
-            $page = $pages[$pagekey];
-            $template_key = $page['template'];
-            if (!array_key_exists($template_key, $this->templates)) {
-                throw new SalicException("Template '$template_key' not found in templates.json");
-            }
-            $template = $this->templates[$template_key];
-            $fields = array();
-            foreach ($template['fields'] as $field) {
-                $data = $this->loadField($field, $pagekey); // loads the data for the field
-                $fields[$field] = $data;
-            }
+            $pageSettings = Settings\PageSettings::get($pagekey);
 
-            $this->doRenderPage($template['file'], array(
-                'pagekey' => $pagekey,
-                'pagename' => $page['name'],
-                'fields' => $fields
-            ));
+            $template = $this->getTemplate($pageSettings->template, $pagekey);
+
+            $data = $this->loadData($pagekey, $template);
+
+            $data['pagetitle'] = $pageSettings->title->get($this->current_lang);
+
+            $this->doRenderPage($template['file'], $data);
         } catch (\Exception $e) {
-            $this->renderError($e);
+            $this->renderError($e, "rendering page");
         }
     }
 
@@ -97,53 +102,179 @@ class Salic
         try {
             http_response_code(404);
 
-            $fields = array();
-            $fields['bannertext'] = $this->loadField('bannertext', '404', "<h1>Page not found</h1>"); // default
-
-            $fields['main'] = $this->loadField('main', '404',
-                "<p>The page you are looking for couldn't be found.<br><a href='/'>Go back to the homepage</a></p>");
-
-            $this->doRenderPage($this->template404, array(
-                'pagekey' => '404',
-                'pagename' => '404',
-                'fields' => $fields
-            ));
+            $defaultTemplate = TemplateSettings::data2(self::defaultTemplateName);
+            $data = $this->loadData('404', $defaultTemplate);
+            $this->doRenderPage($defaultTemplate['file'], $data);
         } catch (\Exception $e) {
-            $this->renderError($e);
+            $this->renderError($e, "rendering 404");
         }
     }
 
-    public function loadField($field, $pagekey, $default = null)
+    public function loadData($pagekey, $template)
     {
-        if (!is_dir("site/data/$pagekey")) {
-            //throw new SalicException("No data for page '$pagekey'");
-            return $default;
+        $fields = array();
+        foreach ($template['fields'] as $field) {
+            $data = $this->loadField($field, $pagekey); // loads the data for the field
+            $fields[$field] = $data;
         }
 
-        $file = "site/data/$pagekey/$field" . "_" . $this->current_lang . $this->dataFileExtension;
+        $variables = array();
+        foreach ($template['variables'] as $var => $defaultVal) {
+            $data = $this->loadVar($var, $defaultVal, $pagekey); // loads the data for the field
+            $variables[$var] = $data;
+        }
+
+        $areas = array();
+        foreach ($template['areas'] as $area) {
+            $data = $this->loadArea($area, $pagekey); // loads the data for the area
+            $areas[$area] = $data;
+        }
+
+        $data = array(
+            'pagekey' => $pagekey,
+            'pagetitle' => $pagekey, // can be changed by the calling function later
+            'fields' => $fields,
+            'variables' => $variables,
+            'areas' => $areas,
+        );
+        return $data;
+    }
+
+    /**
+     * Load the content for $field, or throws an exception
+     * if it fails AND $default is not set.
+     *
+     * @param string $field - the field name
+     * @param string $pagekey
+     * @return string The html content
+     * @throws SalicException If it fails
+     */
+    public function loadField($field, $pagekey)
+    {
+        if (!is_dir("site/data/$pagekey")) {
+            // TODO: notify webmaster of missing data
+            //throw new SalicException("No data for page '$pagekey'");
+            return "";
+        }
+
+        // field files start with '_' (to make it clear, that they don't belong to an area)
+        $file = "site/data/$pagekey/_$field" . "_" . $this->current_lang . self::dataFileExtension;
         if (!is_file($file)) {
-            //throw new SalicException("No data for field '$field' on page '$pagekey'"); TODO: notify webmaster on missing variable
-            return $default;
+            //throw new SalicException("No data for field '$field' on page '$pagekey'");
+            return "";
         }
         return file_get_contents($file);
     }
 
-    private function renderError(\Exception $e)
+    /**
+     * Load the value for $var, or throws an exception
+     * if it fails AND $default is not set.
+     *
+     * @param string $var
+     * @param $defaultVal
+     * @param string $pagekey
+     * @return mixed The value
+     */
+    public function loadVar($var, $defaultVal, $pagekey)
+    {
+        $pageVars = PageSettings::get($pagekey)->variables;
+        if (array_key_exists($var, $pageVars))
+            return $pageVars[$var];
+        else
+            return $defaultVal;
+    }
+
+    /**
+     * Load the content for $area
+     *
+     * @param string $area - the area name
+     * @param string $pagekey
+     * @return string - the html content
+     * @throws SalicException - if it fails
+     */
+    private function loadArea($area, $pagekey)
+    {
+        if (!is_dir("site/data/$pagekey")) {
+            throw new SalicException("No data for page '$pagekey'");
+        }
+
+        $blocks = Settings\PageSettings::get($pagekey)->areas[$area];
+        $rendered = "";
+
+        // fetch all blocks for this area
+        foreach ($blocks as $block) {
+            $pageDir = "site/data/$pagekey/";//$area" . "_" . $block['key'] . "_" . $this->current_lang . self::dataFileExtension;
+            $salicName = $area . "_" . $block['key'];
+
+            $rendered .= $this->loadBlock($pageDir, $block, $salicName);
+        }
+        return $rendered;
+    }
+
+    private function loadBlock($pageDir, $block, $salicName)
+    {
+        $blockSettings = BlockSettings::data2($block['type']);
+
+        if (!$blockSettings['subblocks']) {
+            // default content: '<blockkey>'
+            $file = $pageDir . $salicName . "_" . $this->current_lang . self::dataFileExtension;
+            $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt; ' . $block['key'] . ' &gt;</i></p>'; //TODO: ?block id as default content
+        } else { // subblock = each file, eg. main_blockname_en/left.html.twig, gets loaded into $content['left']
+            $dir = $pageDir . $salicName . '/';
+            $content = array();
+
+            if (is_dir($dir)) {
+                foreach ($blockSettings['subblocks'] as $subblock) {
+                    $filename = $dir . $subblock . "_" . $this->current_lang . self::dataFileExtension;
+                    $subcontent = is_file($filename) ? file_get_contents($filename) : '<p><i>&lt; ' . $block['key'] . '.' . $subblock . ' &gt;</i></p>';
+                    $content[$subblock] = $subcontent;
+                }
+            }
+        }
+
+        $vars = $blockSettings['vars'];
+        foreach ($block['vars'] as $var => $val) {
+            $vars[$var] = $val;
+        }
+
+        $data = array(
+            'baseurl' => $this->baseUrl,
+            'baseurl_international' => $this->baseUrlInternational,
+            'debug_mode' => GeneralSettings::get()->debugMode,
+            'content' => $content,
+            'vars' => $vars,
+        );
+        if ($blockSettings['editable'])
+            $data['salic_name'] = $salicName; // only add salic name if editable
+
+        return $this->twig->render('blocks/' . $block['type'] . self::templateExtension, $data);
+    }
+
+    /**
+     * Render the error page, and exit (not return, exit)
+     *
+     * @param \Exception $e - the exception that occured
+     * @param $while - exception happened while XY
+     */
+    function renderError(\Exception $e, $while)
     {
         http_response_code(500);
-        $this->doRenderPage($this->errorTemplate, array(
-            'exception' => $e
+        echo $this->twig->render(self::errorTemplate, array(
+            'while' => $while,
+            'exception' => $e,
         ));
+        exit;
     }
 
     protected function doRenderPage($templatefile, $vars)
     {
+        $vars['debug_mode'] = GeneralSettings::get()->debugMode;
         $vars['baseurl'] = $this->baseUrl;
         $vars['baseurl_international'] = $this->baseUrlInternational;
-        $vars['nav_pages'] = Utils::removeHiddenPages($this->getPageSettings()['available']);
+        $vars['nav_pages'] = Utils::getNavPageList($this->baseUrl, $this->current_lang);
         $vars['language'] = $this->current_lang;
-        $vars['languages'] = Settings::getLangSettings()['available'];
-        $vars['default_page'] = $this->getPageSettings()['default'];
+        $vars['languages'] = Settings\LangSettings::get()->available;
+        $vars['default_page'] = Settings\NavSettings::get()->homepage;
         echo $this->twig->render($templatefile, $vars);
     }
 }

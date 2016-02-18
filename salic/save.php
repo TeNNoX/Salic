@@ -1,23 +1,29 @@
 <?php
-namespace salic;
+namespace Salic;
+
+use Salic\Settings\LangSettings;
+
 require_once('Salic.php');
 
-$page = $_GET['page'];
+//TODO:? disable error_reporting
 
-$lang_settings = Settings::getLangSettings();
+if (!Utils::validAuthentication()) {
+    exit; // Utils should call exit(), but just to be sure...
+}
+
 $lang = strtolower($_GET['lang']);
-if (!array_key_exists($lang, $lang_settings['available'])) {
+if (!LangSettings::get()->exists($lang)) {
     echo "Invalid Language: $lang"; //TODO:
     exit;
 }
 
 $salic = new SalicMng($lang);
 
+$page = strtolower($_GET['page']);
 if (empty($page)) {
     die('pagekey not given');
 }
 
 $salic->savePage($page);
-die("success"); // if not stopped by an exception, print out the good news
 
 ?>

@@ -7,9 +7,26 @@ $(function () {
     var editor = ContentTools.EditorApp.get();
     editor.init('*[data-salic-name]', 'data-salic-name');
 
+    //TODO: add translations to editor
+
+    // HANDLE IMAGE UPLOADS
+    function imageUploader(dialog) {
+        var image, xhr, xhrComplete, xhrProgress;
+
+        // for now, just show an alert 'not implemented yet'
+        dialog.bind('imageUploader.fileReady', function () {
+            alert("Sorry, Image upload is not implemented yet. :(");
+            dialog.trigger('cancel');
+            new ContentTools.FlashUI('no');
+        });
+    }
+
+    ContentTools.IMAGE_UPLOADER = imageUploader;
+
     // SAVING
     editor.bind('save', function (regions) {
         if ($.isEmptyObject(regions)) {
+            console.log("[SaLiC] Not saving empty changes");
             return; // we don't need to save empty changes
         }
         console.log("[SaLiC] Sending new contents to Server...");
@@ -20,23 +37,30 @@ $(function () {
         function onSaveFail(msg) {
             new ContentTools.FlashUI('no');
             console.log("[SaLiC] " + msg);
-            alert(msg);
-            //TODO: do something when error occurs (go back to edit mode ?)
+            alert("Error: " + msg);
+            //TODO: Handle errors
+            //TODO: save draft locally?
         }
 
         $.post("/edit/" + salic_page_info['language'] + "/" + salic_page_info['pagekey'] + "/save", {
             'regions': regions
         }).always(function () {
-            editor.busy(false);
+            editor.busy(false); // unbusy editor
         }).success(function (data) {
-            if (data.endsWith("success")) { // ignore stuff like Notices before, what counts is the success at the end :P
-                new ContentTools.FlashUI('ok');
-                console.log("[SaLiC] Successfully saved!");
-            } else {
-                onSaveFail("Response from server:\n" + data);
+            try {
+                var json = jQuery.parseJSON(data);
+
+                if (!json['success']) {
+                    onSaveFail(json['error'] || "APIError - (check api result manually)");
+                } else {
+                    new ContentTools.FlashUI('ok');
+                    console.log("[SaLiC] Successfully saved!");
+                }
+            } catch (err) {
+                onSaveFail("JSError - " + err);
             }
         }).fail(function (err) {
-            onSaveFail("Error: " + err + "\n\nResponse from server:\n" + err.responseText);
+            onSaveFail("AJAXError - " + err + "\n\nResponse from server:\n" + err.responseText);
         });
     });
 });

@@ -1,11 +1,58 @@
 <?php
 
-namespace salic;
+namespace Salic;
 
-require_once 'Settings.php';
+use Salic\Exception\SalicSettingsException;
+use Salic\Settings\GeneralSettings;
+use Salic\Settings\LangSettings;
+use Salic\Settings\NavSettings;
+use Salic\Settings\PageSettings;
+use Salic\Settings\Settings;
+
+require_once 'Settings/Settings.php';
 
 class Utils
 {
+
+    /**
+     * Checks if the request is authenticated, otherwise prompts to do that.
+     * Either sends some headers and exits, or returns true.
+     *
+     * But to be safe, always exit if this doesn't return true.
+     *
+     * @return bool If the authentication succeded (should only return true)
+     */
+    public static function validAuthentication()
+    {
+        try {
+            $message = "You have to log in to enter edit mode.";
+            if (isset($_SERVER['PHP_AUTH_USER'])) {
+                //echo "<p>Hello {}.</p>";
+                //echo "<p>You entered {} as your password.</p>";
+                //TODO: save auth?
+                $user = $_SERVER['PHP_AUTH_USER'];
+                $pw = $_SERVER['PHP_AUTH_PW'];
+                $hash = GeneralSettings::get()->passwordHash;
+
+                if ($user != "editor") {
+                    $message = "Wrong username.";
+                } else if (password_verify($pw, $hash)) {
+                    return true;
+                }
+            }
+
+            header('WWW-Authenticate: Basic realm="SaLiC edit mode"');
+            header('HTTP/1.0 401 Unauthorized');
+            echo $message . "<br>";
+            echo "<a href='javascript:window.location.reload()'>Retry</a><br>";
+            echo "<a href='/'>Go to the homepage</a><br>";
+            exit;
+        } catch (\Exception $e) {
+            echo "Excpetion while performing authentication:<br>";
+            echo $e->getMessage() . "<br><br><pre>" . $e->getTraceAsString() . "</pre>";
+            exit;
+        }
+    }
 
     /**
      * Parse the accepted languages from the HTTP Header, and return the preferred one, if available, otherwise the default.
@@ -14,35 +61,13 @@ class Utils
      */
     public static function getDefaultLanguageFromHeader()
     {
-        $lang_settings = Settings::getLangSettings();
+        $lang_settings = LangSettings::get();
 
-        $default = $lang_settings['default'];
-        $available = array_keys($lang_settings['available']);
+        $default = $lang_settings->default;
+        $available = array_keys($lang_settings->available);
 
         require_once 'LanguageDetection.php';
         return getDefaultLanguage($available, $default);
-    }
-
-    /**
-     * makes the pages array nice and consistent
-     * - generate 'href' attribute (baseUrl+pageKey)
-     * - set template to default tempalte if not specified
-     *
-     * @param array $pages
-     * @param $baseUrl
-     * @param $defaultTemplate
-     */
-    public static function normalizePageArray(array &$pages, $baseUrl, $defaultTemplate)
-    {
-        foreach ($pages as $key => &$page) {
-            // generate href
-            $page['href'] = $baseUrl . $key;
-
-            // set default template if not specified
-            if (!array_key_exists('template', $page)) {
-                $page['template'] = $defaultTemplate;
-            }
-        }
     }
 
     public static function returnHttpError($code, $msg = false)
@@ -55,12 +80,69 @@ class Utils
             die();
     }
 
-    public static function removeHiddenPages($pages)
+    /**
+     * Gets the pagelist for nav
+     * - without hidden pages
+     * - with title and href values generated
+     *
+     * eg: ['page1' => ['title' => "Page 1", 'href' => "/page1"]]
+     *
+     * @param $baseUrl
+     * @param $lang
+     * @return array
+     * @throws SalicSettingsException
+     */
+    public static function getNavPageList($baseUrl, $lang)
     {
-        foreach ($pages as $key => $page) {
-            if (array_key_exists('hidden', $page) && $page['hidden'] == true)
-                unset($pages[$key]);
+        $navSettings = NavSettings::get();
+        $nav_array = array();
+        $pages = $navSettings->displayed;
+        $external = $navSettings->external_links;
+
+        foreach ($pages as $key) {
+            $title = PageSettings::get($key)->title->get($lang); //TODO: what to do about titles for external pages
+            $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key . "/"); //TODO:? trailing slash optional
+            $nav_array[$key] = array(
+                'title' => $title,
+                'href' => $href,
+            );
         }
-        return $pages;
+        return $nav_array;
+    }
+
+    /**
+     * Example get values of childKey 'a' of:
+     *    [{"a"=>1, "b" =>2},{"a"=>1, "x" =>12},{"a"=>3, "b" =>5}]
+     * ->[1,2,3]
+     *
+     * @param array $array - the array to get the values from
+     * @param string $childKey - the key that we should get the values from
+     * @return array
+     */
+    public static function childValues($array, $childKey)
+    {
+        $arr = array();
+        foreach ($array as $k => $child) {
+            $arr[] = $child[$childKey];
+        }
+        return $arr;
+    }
+
+    public static function mkdirs($path, $mode = 0777)
+    {
+        if (!is_dir($path)) {
+            if (!mkdir($path, $mode, true))
+                throw new SalicSettingsException("Couldn't create directory", $path);
+        }
+    }
+
+    public static function pageExists($pagekey)
+    {
+        return is_dir(Settings::baseDir . "data/$pagekey");
+    }
+
+    public static function endsWith($haystack, $needle)
+    {
+        return substr_compare($haystack, $needle, -strlen($needle)) === 0;
     }
 }

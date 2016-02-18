@@ -20,10 +20,23 @@
 
     <h3>Webmaster info:</h3>
 
-    Error: {{ exception.getMessage() }}
-    <br> <br>
-    Trace:
+    <b>Happened while</b>: {{ while }}<br>
+
+    <b>Exception</b>: {{ exception|get_class }} <br>
+    <b>Message</b>: {{ exception.getMessage() }} <br>
+    {% if exception is SettingsException %}
+        <b>FileInfo</b>: {{ exception.fileInfo|var_export }} <br>
+    {% endif %}
+
+    <br>
+    <b>Trace:</b>
     <pre>{{ exception.getTraceAsString() }}</pre>
+
+    {% if exception is SettingsException %}
+        <br>
+        <b>Data:</b>
+        <pre>{{ exception.data|var_export }}</pre>
+    {% endif %}
 </div>
 </body>
 </html>

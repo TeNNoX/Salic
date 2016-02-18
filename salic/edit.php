@@ -1,7 +1,14 @@
 <?php
-namespace salic;
+namespace Salic;
+use Salic\Settings\LangSettings;
+
 require_once('Salic.php');
 
+if(!Utils::validAuthentication()) {
+    exit; // Utils should call exit(), but just to be sure...
+}
+
+// for just /edit/, render the backend.
 if (!array_key_exists('page', $_GET) && !array_key_exists('lang', $_GET)) {
     // main backend page
     $salic = new SalicMng('en');
@@ -10,9 +17,8 @@ if (!array_key_exists('page', $_GET) && !array_key_exists('lang', $_GET)) {
     exit;
 }
 
-$lang_settings = Settings::getLangSettings();
 $lang = strtolower(@$_GET['lang']);
-if (!array_key_exists($lang, $lang_settings['available'])) {
+if (!LangSettings::get()->exists($lang)) {
     echo "Invalid Language: '$lang'";
     exit;
 }
@@ -21,8 +27,12 @@ $salic = new SalicMng($lang);
 $salic->initTwig();
 
 $page = strtolower($_GET['page']);
-if (!$page) { // default page
-    $page = $salic->getPageSettings()['default'];
+if (empty($page)) { // default page
+    try {
+        $page = Settings\NavSettings::get()->homepage;
+    } catch (\Exception $e) {
+        $salic->renderError($e, "selecting homepage");
+    }
 }
 
 $salic->renderPage($page);
