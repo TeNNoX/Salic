@@ -5,6 +5,8 @@ use Salic\Settings\LangSettings;
 
 require_once('Salic.php');
 
+//TODO:? disable error_reporting
+
 if (!Utils::validAuthentication()) {
     exit; // Utils should call exit(), but just to be sure...
 }

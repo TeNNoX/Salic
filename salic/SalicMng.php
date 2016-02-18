@@ -62,6 +62,7 @@ class SalicMng extends Salic //TODO: implement backend
             $result['error'] = "PHPException - " . $e->getMessage();
         }
 
+        header('Content-Type: application/json');
         echo json_encode($result);
     }
 
@@ -84,7 +85,7 @@ class SalicMng extends Salic //TODO: implement backend
             }
             $areaKey = $matches[1];
             $blockKey = $matches[2];
-            $subblock = $matches[3];
+            $subblock = @$matches[3]; // subblock is optional
 
             if (!array_key_exists($areaKey, $pageSettings->areas)) {
                 throw new \Exception('Invalid area: ' . $areaKey);
