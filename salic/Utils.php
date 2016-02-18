@@ -101,7 +101,7 @@ class Utils
 
         foreach ($pages as $key) {
             $title = PageSettings::get($key)->title->get($lang); //TODO: what to do about titles for external pages
-            $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key);
+            $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key . "/"); //TODO:? trailing slash optional
             $nav_array[$key] = array(
                 'title' => $title,
                 'href' => $href,
