@@ -113,6 +113,8 @@ class ImgSteward
         $path = implode('/', explode('/', $path, -1));
 
         if (!is_dir($path)) {
+            if (self::debug)
+                echo "Creating directory: $path<br>";
             if (!mkdir($path, $mode, true))
                 throw new Exception("Couldn't create directory: " . $path);
         }
