@@ -1,10 +1,12 @@
-## Send everything to the index.php ##
+## Rewrite requests to the php file that handles it.
+## Order: most specific > less specific
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
   # TESTS
   RewriteRule ^tests/?$ salic/tests/overview.php [END]
   RewriteRule ^tests/(.+)/$ salic/tests/test_$1.php [END]
+  
 
   # /static/img/*.jpg -> ImgSteward
   RewriteRule ^static/img/(.+)\.jpg$ img_steward.php?img_path=$1.jpg [END,QSA]
@@ -19,18 +21,17 @@
   RewriteRule (.*) %{REQUEST_URI}/ [R=301,END]
 
 
-  # /edit/lang/.../save/
-  RewriteRule ^edit/([A-z_-]+)/(.*)/save/$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
-  # /edit/lang/.../
-  RewriteRule ^edit/([A-z_-]+)/(.*)/$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
-  # /edit/XYZ/
-  #RewriteRule ^edit/([^/]*)/$ edit.php?page=$2 [END,QSD] -> TODO:? 'no language'-link support
-  # /edit/
-  RewriteRule ^edit/$ edit.php [END,QSD]
+  # /edit/lang/PAGE/save[/]
+  RewriteRule ^edit/([A-z_-]+)/(.+)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
+  # /edit/lang/[PAGE][/]
+  RewriteRule ^edit/([A-z_-]+)/(.*)/?$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
+  # /edit/PAGE[/] > TODO:? 'no language'-link support
+  # /edit[/]
+  RewriteRule ^edit/?$ edit.php [END,QSD]
 
-  # /en/.../
-  RewriteRule ^([A-z_-]+)/(?:(.+)/)?$ index.php?lang=$1&page=$2 [END,QSD]
-  # /XYZ
+  # /LANG/[PAGE][/]
+  RewriteRule ^([A-z_-]+)/(.*)/?$ index.php?lang=$1&page=$2 [END,QSD]
+  # /PAGE[/]
   #RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
   # /
   RewriteRule ^$ index.php [END,QSD]
