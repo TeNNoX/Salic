@@ -94,7 +94,7 @@ class Salic
 
             $this->doRenderPage($template['file'], $data);
         } catch (\Exception $e) {
-            $this->renderError($e, "rendering page");
+            Utils::dieWithError($e, 'page rendering', $this);
         }
     }
 
@@ -107,7 +107,8 @@ class Salic
             $data = $this->loadData('404', $defaultTemplate);
             $this->doRenderPage($defaultTemplate['file'], $data);
         } catch (\Exception $e) {
-            $this->renderError($e, "rendering 404");
+            Utils::dieWithError($e, '404 rendering', $this);
+            exit;
         }
     }
 
@@ -255,13 +256,13 @@ class Salic
      * Render the error page, and exit (not return, exit)
      *
      * @param \Exception $e - the exception that occured
-     * @param $while - exception happened while XY
+     * @param $during - exception happened during XY
      */
-    function renderError(\Exception $e, $while)
+    function renderError(\Exception $e, $during)
     {
         http_response_code(500);
         echo $this->twig->render(self::errorTemplate, array(
-            'while' => $while,
+            'during' => $during,
             'exception' => $e,
         ));
         exit;

@@ -23,9 +23,7 @@ try {
         exit;
     }
 } catch (\Exception $e) {
-    $salic = new Salic(null); //TODO: Special settings error page
-    $salic->initTwig();
-    $salic->renderError($e, "selecting language");
+    Utils::dieWithError($e, 'Language determination');
     exit;
 }
 
@@ -36,7 +34,7 @@ if (empty($page)) {
     try {
         $page = NavSettings::get()->homepage;
     } catch (\Exception $e) {
-        $salic->renderError($e, "selecting homepage");
+        Utils::dieWithError($e, 'Homepage determination', $salic);
     }
 }
 

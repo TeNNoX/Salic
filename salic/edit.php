@@ -31,7 +31,8 @@ if (empty($page)) { // default page
     try {
         $page = Settings\NavSettings::get()->homepage;
     } catch (\Exception $e) {
-        $salic->renderError($e, "selecting homepage");
+        Utils::dieWithError($e, 'Homepage determination', $salic);
+        exit;
     }
 }
 

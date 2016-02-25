@@ -145,4 +145,14 @@ class Utils
     {
         return substr_compare($haystack, $needle, -strlen($needle)) === 0;
     }
+
+    public static function dieWithError($e, $during, $salic = null) //TODO: Improve error page
+    {
+        if (empty($salic))
+            $salic = new Salic(null);
+
+        $salic->initTwig();
+        $salic->renderError($e, $during);
+        exit;
+    }
 }
