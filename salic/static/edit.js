@@ -42,8 +42,13 @@ $(function () {
             //TODO: save draft locally?
         }
 
-        $.post("/edit/" + salic_page_info['language'] + "/" + salic_page_info['pagekey'] + "/save", {
-            'regions': regions
+        $.ajax({
+            type: "POST",
+            url: "/edit/" + salic_page_info['language'] + "/" + salic_page_info['pagekey'] + "/save/",
+            dataType: "text", // prevent json parsing, I'm doing that myself, TODO:? use jquerys json parsing?
+            data: {
+                'regions': regions
+            }
         }).always(function () {
             editor.busy(false); // unbusy editor
         }).success(function (data) {
