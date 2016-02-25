@@ -17,9 +17,9 @@ try {
         }
     } else {
         $lang = Utils::getDefaultLanguageFromHeader();  // language is not given, redirect to the best one
-        echo "Redirect: <a href='/$lang/$page'>/$lang/$page</a>";
         http_response_code(302); //TODO: how to redirect properly for localisation
         header("Location:/$lang/$page");
+        echo "Redirect: <a href='/$lang/$page'>/$lang/$page</a>";
         exit;
     }
 } catch (\Exception $e) {
