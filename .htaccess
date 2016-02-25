@@ -19,14 +19,14 @@
 
   # /edit/lang/PAGE/save[/]
   RewriteRule ^edit/([A-z_-]+)/(.+)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
-  # /edit/lang/[PAGE][/]
-  RewriteRule ^edit/([A-z_-]+)/(.*)/?$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
+  # /edit/lang/[PAGE][/]    (no page = homepage)
+  RewriteRule ^edit/([A-z_-]+)/(.*?)/?$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
   # /edit/PAGE[/] > TODO:? 'no language'-link support
   # /edit[/]
   RewriteRule ^edit/?$ edit.php [END,QSD]
 
-  # /LANG/[PAGE][/]
-  RewriteRule ^([A-z_-]+)/(.*)/?$ index.php?lang=$1&page=$2 [END,QSD]
+  # /LANG/[PAGE][/]    (no page = homepage)
+  RewriteRule ^([A-z_-]+)/(.*?)/?$ index.php?lang=$1&page=$2 [END,QSD]
   # /PAGE[/]
   #RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
   # /

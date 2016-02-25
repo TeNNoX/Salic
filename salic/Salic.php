@@ -77,6 +77,7 @@ class Salic
     public function renderPage($pagekey)
     {
         try {
+            //TODO: sanitize pagekey (eg. trailing slash)
             if (!Utils::pageExists($pagekey)) { // when querying an invalid page, go to 404
                 $this->render404();
                 return;
