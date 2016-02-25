@@ -2,9 +2,7 @@
 
 namespace Salic;
 
-use Salic\Exception\ShouldNotHappenException;
 use Salic\Settings\BlockSettings;
-use Salic\Settings\NavSettings;
 use Salic\Settings\PageSettings;
 use Salic\Settings\TemplateSettings;
 

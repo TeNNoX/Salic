@@ -2,7 +2,6 @@
 
 namespace Salic\Settings;
 use Salic\Exception\SalicSettingsException;
-use Salic\Exception\ShouldNotHappenException;
 use Salic\Utils;
 
 
