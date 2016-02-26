@@ -1,5 +1,6 @@
 <?php
 namespace Salic;
+
 use Salic\Settings\NavSettings;
 
 require_once('Salic.php');

@@ -6,7 +6,6 @@ html, body {
     height: 100%;
 }
 
-
 #sidebar {
     background-color: #1f262e;
     width: 200px;
@@ -51,6 +50,7 @@ html, body {
     transition: all 0.3s ease 0s;
     cursor: pointer;
 }
+
 #sidebar li:hover {
     background-color: #3d4b5c;
     font-size: 1.01em;

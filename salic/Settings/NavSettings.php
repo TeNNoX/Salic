@@ -1,6 +1,7 @@
 <?php
 
 namespace Salic\Settings;
+
 use Salic\Exception\SalicSettingsException;
 use Salic\Utils;
 

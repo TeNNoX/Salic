@@ -1,10 +1,11 @@
 <?php
 namespace Salic;
+
 use Salic\Settings\LangSettings;
 
 require_once('Salic.php');
 
-if(!Utils::validAuthentication()) {
+if (!Utils::validAuthentication()) {
     exit; // Utils should call exit(), but just to be sure...
 }
 
