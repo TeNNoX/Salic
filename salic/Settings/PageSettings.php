@@ -98,7 +98,7 @@ class PageSettings extends Settings
 
         // create empty areas that are not present
         $myTemplate = $templateSettings->data($this->template);
-        $templateAreas = $myTemplate['areas'];
+        $templateAreas = $myTemplate->areas;
         foreach ($templateAreas as $area) {
             if (!array_key_exists($area, $this->areas))
                 $this->areas[$area] = [];
@@ -123,7 +123,7 @@ class PageSettings extends Settings
 
                 $block['type'] = self::getString('type', $block, null, "areas>$areaKey>$blockKey"); // eg. 'templates.json:areas>main>intro'
                 if (!BlockSettings::exists2($block['type']))
-                    throw new SalicSettingsException("Block '{$block['type']}' is not defined in blocks.json", $this->file . self::fis . "areas>$areaKey>$blockKey");
+                    throw new SalicSettingsException("Block '{$block['type']}' is not defined in blocks.json", $this->file . self::fis . "areas>$areaKey>$blockKey", BlockSettings::get()->blocktypes);
 
                 // set to parsed value, TODO: move stuff like this to parseFromJson()
                 $block['vars'] = self::getDict('vars', $block, [], "areas>$areaKey>$blockKey");
@@ -131,7 +131,7 @@ class PageSettings extends Settings
         }
 
         // check variables list
-        $templateVars = $myTemplate['variables'];
+        $templateVars = $myTemplate->variables;
         foreach ($this->variables as $var => $value) {
             // check if variable exists in template
             if (!array_key_exists($var, $templateVars))
@@ -150,7 +150,7 @@ class PageSettings extends Settings
     private function getDefaultAreas($template = 'default')
     {
         $defaultAreas = array();
-        foreach (TemplateSettings::data2($template)['areas'] as $area) {
+        foreach (TemplateSettings::data2($template)->areas as $area) {
             $defaultAreas[$area] = array(); // ['area1' => [], 'area2' => []]
         }
         return $defaultAreas;

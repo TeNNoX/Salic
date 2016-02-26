@@ -10,6 +10,10 @@ class TemplateSettings extends Settings
 {
 
     public $default;
+
+    /**
+     * @var array The Template list
+     */
     public $templates;
 
     /**
@@ -35,7 +39,7 @@ class TemplateSettings extends Settings
 
     /**
      * @param string $name The template name
-     * @return array
+     * @return Template
      */
     public function data($name)
     {
@@ -44,7 +48,7 @@ class TemplateSettings extends Settings
 
     /**
      * @param string $name The template name
-     * @return array
+     * @return Template
      */
     public static function data2($name) // static version
     {
@@ -64,18 +68,26 @@ class TemplateSettings extends Settings
     public function getDefault()
     {
         return [
-            'default' => [
-                'file' => 'default.html.twig',
-                'fields' => [],
-                'variables' => [],
-                "areas" => [],
-            ],
+            'default' => new Template('default.html.twig')
         ];
     }
 
     public function parseFromJson($json)
     {
-        $this->templates = self::getDict(null, $json);
+        $templates = self::getDict(null, $json);
+
+        $this->templates = [];
+        foreach ($templates as $key => $template) {
+            $extraInfo = $key;  // fileInfo is e.g. 'templates.json:default'
+
+            $filename = self::getString('file', $template, $key . Salic::templateExtension, $extraInfo); //default = eg. 'templatename.html.twig'
+
+            $fields = self::getList('fields', $template, [], $extraInfo);
+            $variables = self::getDict('variables', $template, [], $extraInfo);
+            $areas = self::getList('areas', $template, [], $extraInfo);
+
+            $this->templates[$key] = new Template($filename, $fields, $areas, $variables);
+        }
 
         $this->default = array_key_exists('default', $this->templates) ? 'default' : array_keys($this->templates)[0];
     }
@@ -88,16 +100,8 @@ class TemplateSettings extends Settings
         }
 
         foreach ($this->templates as $name => &$template) {
-            $extraInfo = $name;  // fileInfo is e.g. 'templates.json:default'
-
-            $template['file'] = self::getString('file', $template, $name . Salic::templateExtension, $extraInfo); //default = eg. 'templatename.html.twig'
             // TODO: check if template file exists
-
-            //TODO: parse templates to Template objects
             //TODO: sanitize var/field/area/block names (no underscore?, no dot, ...)
-            $template['fields'] = self::getList('fields', $template, [], $extraInfo);
-            $template['variables'] = self::getDict('variables', $template, [], $extraInfo);
-            $template['areas'] = self::getList('areas', $template, [], $extraInfo);
         }
     }
 }

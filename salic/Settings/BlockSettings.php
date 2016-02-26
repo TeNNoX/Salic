@@ -9,7 +9,10 @@ use Salic\Salic;
 class BlockSettings extends Settings
 {
 
-    public $blocks;
+    /**
+     * @var array The blocktype list
+     */
+    public $blocktypes;
 
     /**
      * @var self A cached instance of this, if available
@@ -33,36 +36,36 @@ class BlockSettings extends Settings
     }
 
     /**
-     * @param string $name The block type
-     * @return array
+     * @param string $name The blocktype
+     * @return BlockType
      */
     public function data($name)
     {
-        return $this->blocks[$name];
+        return $this->blocktypes[$name];
     }
 
     /**
      * @param string $name The block type
-     * @return array The block settings
+     * @return BlockType The blocktype
      * @throws SalicSettingsException
      */
     public static function data2($name) // static version
     {
         $self = self::get();
-        if (!array_key_exists($name, $self->blocks))
-            throw new SalicSettingsException("Undefined block type: " . $name, $self->file, $self->blocks);
+        if (!array_key_exists($name, $self->blocktypes))
+            throw new SalicSettingsException("Undefined block type: " . $name, $self->file, $self->blocktypes);
         else
-            return $self->blocks[$name];
+            return $self->blocktypes[$name];
     }
 
     public function exists($name)
     {
-        return array_key_exists($name, $this->blocks);
+        return array_key_exists($name, $this->blocktypes);
     }
 
     public static function exists2($name) // static version
     {
-        return array_key_exists($name, self::get()->blocks);
+        return array_key_exists($name, self::get()->blocktypes);
     }
 
     public function getDefault()
@@ -72,24 +75,24 @@ class BlockSettings extends Settings
 
     public function parseFromJson($json)
     {
-        $this->blocks = self::getDict(null, $json, []);
+        $blocks = self::getDict(null, $json, []);
+
+        $this->blocktypes = [];
+        foreach ($blocks as $type => $block) {
+            $extraInfo = $type;  // fileInfo is e.g. 'blocks.json:text'
+
+            $file = self::getString('file', $block, $type . Salic::templateExtension, $extraInfo);
+            $editable = self::getBoolean('editable', $block, true, $extraInfo);
+            $subblocks = self::getList('subblocks', $block, [], $extraInfo);
+            $vars = self::getDict('vars', $block, [], $extraInfo);
+
+            $this->blocktypes[$type] = new BlockType($file, $vars, $subblocks, $editable);
+        }
     }
 
     public function validate()
     {
-        foreach ($this->blocks as $type => &$block) {
-            $extraInfo = $type;  // fileInfo is e.g. 'blocks.json:text'
-
-            $block['file'] = self::getString('file', $block, $type . Salic::templateExtension, $extraInfo);
-            // TODO: check if blocktype file exists
-
-            $block['editable'] = self::getBoolean('editable', $block, true, $extraInfo);
-
-            $block['subblocks'] = self::getList('subblocks', $block, [], $extraInfo);
-
-            //TODO: parse blocks to Block objects
-            //TODO: sanitize var names (no underscore?, no dot, ...)
-            $block['vars'] = self::getDict('vars', $block, [], $extraInfo);
-        }
+        // TODO: check if blocktype file exists
+        // TODO: sanitize var names (no underscore?, no dot, ...)
     }
 }

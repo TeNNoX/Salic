@@ -7,6 +7,7 @@ use Salic\Exception\SalicSettingsException;
 use Salic\Settings\BlockSettings;
 use Salic\Settings\GeneralSettings;
 use Salic\Settings\PageSettings;
+use Salic\Settings\Template;
 use Salic\Settings\TemplateSettings;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
@@ -92,7 +93,7 @@ class Salic
 
             $data['pagetitle'] = $pageSettings->title->get($this->current_lang);
 
-            $this->doRenderPage($template['file'], $data);
+            $this->doRenderPage($template->filename, $data);
         } catch (\Exception $e) {
             Utils::dieWithError($e, 'page rendering', $this);
         }
@@ -105,29 +106,29 @@ class Salic
 
             $defaultTemplate = TemplateSettings::data2(self::defaultTemplateName);
             $data = $this->loadData('404', $defaultTemplate);
-            $this->doRenderPage($defaultTemplate['file'], $data);
+            $this->doRenderPage($defaultTemplate->filename, $data);
         } catch (\Exception $e) {
             Utils::dieWithError($e, '404 rendering', $this);
             exit;
         }
     }
 
-    public function loadData($pagekey, $template)
+    public function loadData($pagekey, Template $template)
     {
         $fields = array();
-        foreach ($template['fields'] as $field) {
+        foreach ($template->fields as $field) {
             $data = $this->loadField($field, $pagekey); // loads the data for the field
             $fields[$field] = $data;
         }
 
         $variables = array();
-        foreach ($template['variables'] as $var => $defaultVal) {
+        foreach ($template->variables as $var => $defaultVal) {
             $data = $this->loadVar($var, $defaultVal, $pagekey); // loads the data for the field
             $variables[$var] = $data;
         }
 
         $areas = array();
-        foreach ($template['areas'] as $area) {
+        foreach ($template->areas as $area) {
             $data = $this->loadArea($area, $pagekey); // loads the data for the area
             $areas[$area] = $data;
         }
@@ -217,7 +218,7 @@ class Salic
     {
         $blockSettings = BlockSettings::data2($block['type']);
 
-        if (!$blockSettings['subblocks']) {
+        if (!$blockSettings->subblocks) {
             // default content: '<blockkey>'
             $file = $pageDir . $salicName . "_" . $this->current_lang . self::dataFileExtension;
             $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt; ' . $block['key'] . ' &gt;</i></p>'; //TODO: ?block id as default content
@@ -226,7 +227,7 @@ class Salic
             $content = array();
 
             if (is_dir($dir)) {
-                foreach ($blockSettings['subblocks'] as $subblock) {
+                foreach ($blockSettings->subblocks as $subblock) {
                     $filename = $dir . $subblock . "_" . $this->current_lang . self::dataFileExtension;
                     $subcontent = is_file($filename) ? file_get_contents($filename) : '<p><i>&lt; ' . $block['key'] . '.' . $subblock . ' &gt;</i></p>';
                     $content[$subblock] = $subcontent;
@@ -234,7 +235,7 @@ class Salic
             }
         }
 
-        $vars = $blockSettings['vars'];
+        $vars = $blockSettings->vars;
         foreach ($block['vars'] as $var => $val) {
             $vars[$var] = $val;
         }
@@ -246,7 +247,7 @@ class Salic
             'content' => $content,
             'vars' => $vars,
         );
-        if ($blockSettings['editable'])
+        if ($blockSettings->editable)
             $data['salic_name'] = $salicName; // only add salic name if editable
 
         return $this->twig->render('blocks/' . $block['type'] . self::templateExtension, $data);

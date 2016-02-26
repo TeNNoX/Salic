@@ -93,8 +93,8 @@ class SalicMng extends Salic //TODO: implement backend
                 }
                 $fieldKey = $matches[1];
 
-                if ($fieldKey && !in_array($fieldKey, $templateSettings['fields'])) {
-                    throw new SalicApiException("Invalid field: '$fieldKey'", $templateSettings['fields']);
+                if ($fieldKey && !in_array($fieldKey, $templateSettings->fields)) {
+                    throw new SalicApiException("Invalid field: '$fieldKey'", $templateSettings->fields);
                 }
 
                 // save as '_field-key_lang.ext'
@@ -114,10 +114,10 @@ class SalicMng extends Salic //TODO: implement backend
                     throw new SalicApiException("Invalid block: '$blockKey'", $pageSettings->areas[$areaKey]);
                 }
                 $blockType = $blockSettings->data($myBlock['type']);
-                if ($subblock && !in_array($subblock, $blockType['subblocks'])) {
-                    throw new SalicApiException("Invalid subblock: '$subblock'[type={$myBlock['type']}]", $blockType['subblocks']);
+                if ($subblock && !in_array($subblock, $blockType->subblocks)) {
+                    throw new SalicApiException("Invalid subblock: '$subblock'[type={$myBlock['type']}]", $blockType->subblocks);
                 }
-                if (!$blockType['editable']) {
+                if (!$blockType->editable) {
                     throw new SalicApiException("Block not editable: '$blockKey'[type={$myBlock['type']}]");
                 }
 
