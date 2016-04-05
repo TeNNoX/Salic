@@ -216,9 +216,9 @@ class Salic
 
     private function loadBlock($pageDir, $block, $salicName)
     {
-        $blockSettings = BlockSettings::data2($block['type']);
+        $blockType = BlockSettings::data2($block['type']);
 
-        if (!$blockSettings->subblocks) {
+        if (!$blockType->subblocks) {
             // default content: '<blockkey>'
             $file = $pageDir . $salicName . "_" . $this->current_lang . self::dataFileExtension;
             $content = is_file($file) ? file_get_contents($file) : '<p><i>&lt; ' . $block['key'] . ' &gt;</i></p>'; //TODO: ?block id as default content
@@ -227,15 +227,27 @@ class Salic
             $content = array();
 
             if (is_dir($dir)) {
-                foreach ($blockSettings->subblocks as $subblock) {
+                if ($blockType->subblocks === true) { // -> variable subblocks
+                    $subblocks = range(1, $block['subblock-count']); //TODO: backend solution or better solution
+                } else { // predefined subblocks
+                    $subblocks = $blockType->subblocks;
+                }
+
+                foreach ($subblocks as $subblock) {
                     $filename = $dir . $subblock . "_" . $this->current_lang . self::dataFileExtension;
                     $subcontent = is_file($filename) ? file_get_contents($filename) : '<p><i>&lt; ' . $block['key'] . '.' . $subblock . ' &gt;</i></p>';
+                    $content[$subblock] = $subcontent;
+                }
+
+            } else if ($blockType->subblocks === true) { // -> variable subblocks, initialize empty elements
+                foreach (range(1, $block['subblock-count']) as $subblock) {
+                    $subcontent = '<p><i>&lt; ' . $block['key'] . '.' . $subblock . ' &gt;</i></p>';
                     $content[$subblock] = $subcontent;
                 }
             }
         }
 
-        $vars = $blockSettings->vars;
+        $vars = $blockType->vars;
         foreach ($block['vars'] as $var => $val) {
             $vars[$var] = $val;
         }
@@ -247,7 +259,7 @@ class Salic
             'content' => $content,
             'vars' => $vars,
         );
-        if ($blockSettings->editable)
+        if ($blockType->editable)
             $data['salic_name'] = $salicName; // only add salic name if editable
 
         return $this->twig->render('blocks/' . $block['type'] . self::templateExtension, $data);

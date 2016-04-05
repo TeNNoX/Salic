@@ -83,7 +83,11 @@ class BlockSettings extends Settings
 
             $file = self::getString('file', $block, $type . Salic::templateExtension, $extraInfo);
             $editable = self::getBoolean('editable', $block, true, $extraInfo);
-            $subblocks = self::getList('subblocks', $block, [], $extraInfo);
+            if (in_array('subblocks', $block) && $block['subblocks'] === true) {
+                $subblocks = true; // variable subblocks
+            } else {
+                $subblocks = self::getList('subblocks', $block, [], $extraInfo); // predefined list of subblocks
+            }
             $vars = self::getDict('vars', $block, [], $extraInfo);
 
             $this->blocktypes[$type] = new BlockType($file, $vars, $subblocks, $editable);

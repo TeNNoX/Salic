@@ -114,9 +114,13 @@ class SalicMng extends Salic //TODO: implement backend
                     throw new SalicApiException("Invalid block: '$blockKey'", $pageSettings->areas[$areaKey]);
                 }
                 $blockType = $blockSettings->data($myBlock['type']);
-                if ($subblock && !in_array($subblock, $blockType->subblocks)) {
-                    throw new SalicApiException("Invalid subblock: '$subblock'[type={$myBlock['type']}]", $blockType->subblocks);
+                if ($subblock) {
+                    if ($blockType->subblocks === true ? !is_numeric($subblock) // variable subblocks, should be an int
+                        : !in_array($subblock, $blockType->subblocks) // predefined subblocks, should exist
+                    )
+                        throw new SalicApiException("Invalid subblock: '$subblock'[type={$myBlock['type']}]", $blockType->subblocks);
                 }
+
                 if (!$blockType->editable) {
                     throw new SalicApiException("Block not editable: '$blockKey'[type={$myBlock['type']}]");
                 }
@@ -133,6 +137,7 @@ class SalicMng extends Salic //TODO: implement backend
             if ($flag === false) {
                 throw new \Exception("Failed to write file '{$page_dir}{$filename}" . self::dataFileExtension . "'");
             }
+
             //TODO: set file permissions
         }
     }

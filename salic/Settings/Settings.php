@@ -39,7 +39,7 @@ abstract class Settings
      * @param string $key The key to check for in the array
      * @param array $array The array what should be checked
      * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
-     * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
+     * @param string $extraFileInfo Some extra info to add to the filename in case of an exception  (eg 'areas>XYZ')
      * @return boolean The value
      * @throws SalicSettingsException If empty and no $default is given, or the existing value is not a string
      */
@@ -60,7 +60,7 @@ abstract class Settings
      * @param string $key The key to check for in the array
      * @param array $array The array what should be checked
      * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
-     * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
+     * @param string $extraFileInfo Some extra info to add to the filename in case of an exception  (eg 'areas>XYZ')
      * @param string $pattern Optional regex to check proper format
      * @return string The value
      * @throws SalicSettingsException If empty and no $default is given, or the existing value is not a string
@@ -79,10 +79,31 @@ abstract class Settings
     }
 
     /**
+     * Assert that $key exists in $array, and is an integer.
+     *
+     * @param string $key The key to check for in the array
+     * @param array $array The array what should be checked
+     * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
+     * @param string $extraFileInfo Some extra info to add to the filename in case of an exception (eg 'areas>XYZ')
+     * @return int The value
+     * @throws SalicSettingsException If empty and no $default is given, or the existing value is not an integer
+     */
+    protected function getInt($key, array $array, $default = null, $extraFileInfo = "")
+    {
+        $fileInfo = $this->file . ($extraFileInfo ? self::fis . $extraFileInfo : '');
+        $value = self::getKey($key, $array, $default, $fileInfo);
+
+        if (!is_numeric($value))
+            throw new SalicSettingsException("Key '$key' is not an integer", $fileInfo);
+
+        return intval($value);
+    }
+
+    /**
      * @param $key - the key to check for in the array
      * @param array $array - the array what should be checked
      * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
-     * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
+     * @param string $extraFileInfo Some extra info to add to the filename in case of an exception  (eg 'areas>XYZ')
      * @return array The value
      * @throws SalicSettingsException - if assert fails
      */
@@ -102,7 +123,7 @@ abstract class Settings
      * @param $key - the key to check for in the array
      * @param array $array - the array what should be checked
      * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
-     * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
+     * @param string $extraFileInfo Some extra info to add to the filename in case of an exception  (eg 'areas>XYZ')
      * @return array The value
      * @throws SalicSettingsException - if assert fails
      */
@@ -125,7 +146,7 @@ abstract class Settings
      * @param string $key The key to check for in the array
      * @param array $array The array what should be checked
      * @param string $default The default value, if the key doesn't exist. If this is null, an exception is thrown.
-     * @param string $extraFileInfo Some extra info to add to the filename (eg 'areas>XYZ')
+     * @param string $extraFileInfo Some extra info to add to the filename in case of an exception  (eg 'areas>XYZ')
      * @param string $pattern Optional regex to check proper format
      * @return TranslatedString The value
      * @throws SalicSettingsException If empty and no $default is given, or the existing value is not a string
@@ -202,7 +223,7 @@ abstract class Settings
         file_put_contents($file, $raw);
     }
 
-    private static function getKey($key, $array, $default, $fileInfo)
+    protected static function getKey($key, $array, $default, $fileInfo)
     {
         if ($key == null) // if key is null, return the array itself
             return $array;

@@ -125,6 +125,11 @@ class PageSettings extends Settings
                 if (!BlockSettings::exists2($block['type']))
                     throw new SalicSettingsException("Block '{$block['type']}' is not defined in blocks.json", $this->file . self::fis . "areas>$areaKey>$blockKey", BlockSettings::get()->blocktypes);
 
+                $blockSettings = BlockSettings::data2($block['type']);
+                if($blockSettings->subblocks === true) { // if the blocktype has variable subblocks, check if the count is given
+                    $block['subblock-count'] = self::getInt('subblock-count', $block, 1, "areas>$areaKey>$blockKey");
+                }
+
                 // set to parsed value, TODO: move stuff like this to parseFromJson()
                 $block['vars'] = self::getDict('vars', $block, [], "areas>$areaKey>$blockKey");
             }
