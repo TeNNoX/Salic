@@ -16,12 +16,34 @@ html, body {
     padding: 0;
     margin-left: -200px;
     transition: all 0.5s ease 0s;
+    z-index: 5;
+}
+
+#nav-hamburger {
+    position: absolute;
+    top: 50%;
+    right: -0.6em;
+    width: 0.6em;
+    height: 0.6em;
+    margin-top: -0.3em;
+    background: linear-gradient(to bottom, #313c49 0%, #313c49 20%, transparent 20%, transparent 40%, #313c49 40%, #313c49 60%, transparent 60%, transparent 80%, #313c49 80%, #313c49 100%);
+    cursor: pointer;
+    transition: all 0.5s ease 0s;
+}
+
+#sidebar.toggled #nav-hamburger {
+    right: 0;
+    background: linear-gradient(to bottom, #fff 0%, #fff 20%, transparent 20%, transparent 40%, #fff 40%, #fff 60%, transparent 60%, transparent 80%, #fff 80%, #fff 100%);
 }
 
 @media (min-width: 768px) {
     #sidebar {
         margin-left: 0;
         width: 200px;
+    }
+
+    #nav-hamburger {
+        display: none;
     }
 
     #content {
@@ -48,6 +70,9 @@ html, body {
 #sidebar li {
     padding: 10px 30px;
     transition: all 0.3s ease 0s;
+}
+
+#sidebar li:not(#logo) {
     cursor: pointer;
 }
 
@@ -61,8 +86,33 @@ html, body {
     font-size: 1.5em;
 }
 
+#sidebar li > a {
+    color: white;
+    padding: 0;
+}
+
+#sidebar li > a:hover, #sidebar li > a:focus {
+    background-color: transparent;
+}
+
 /* CONTENT */
 #content {
     padding: 15px;
     transition: all 0.5s ease 0s;
 }
+
+.glyphicon {
+    color: black;
+}
+
+.glyphicon.-inactive {
+    color: grey;
+    cursor: pointer;
+}
+
+.glyphicon.-inactive:hover, .glyphicon.-active {
+    color: #2e8ece;
+    cursor: pointer;
+}
+
+/* NAVIGATION SECTION */

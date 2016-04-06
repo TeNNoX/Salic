@@ -11,8 +11,6 @@ class SalicMng extends Salic //TODO: implement backend
 {
     const baseUrlInternational = "/edit/";
 
-    private $mainEditTemplate = '@salic/backend.html.twig';
-
     /**
      * SalicMng constructor.
      * @param string $lang The language for this request
@@ -24,12 +22,9 @@ class SalicMng extends Salic //TODO: implement backend
         $this->baseUrl = $this->baseUrlInternational . "$lang/";
     }
 
-    public function renderBackend()
-    { //TODO: implement/fix backend
-        echo "<h1>Imagine a backend over here.</h1>";
-        /*$this->doRenderPage($this->mainEditTemplate, array(
-            'pages' => Settings\NavSettings::get()->displayed,
-        ));*/
+    public function renderBackendPage($template, $vars = [])
+    {
+        parent::doRenderPage($template, $vars);
     }
 
     protected function doRenderPage($templatefile, $vars)
@@ -50,7 +45,7 @@ class SalicMng extends Salic //TODO: implement backend
             }
             $regions = $_POST['regions'];
 
-            if ($pagekey !== '404' && !Utils::pageExists($pagekey)) { //TODO: sanitize pagekey
+            if ($pagekey !== '404' && !PageSettings::pageExists($pagekey)) { //TODO: sanitize pagekey
                 //TODO: error handling
                 Utils::returnHttpError(400, "Error: Unknown pagekey '$pagekey'");
             }

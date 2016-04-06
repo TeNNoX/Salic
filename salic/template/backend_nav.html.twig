@@ -1,0 +1,37 @@
+{% extends '@salic/backend.html.twig' %}
+
+{% block content %}
+    <div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">Navigation</div>
+
+        <ul class="nav-list list-group">
+            {% for page in navSettings.displayed %}
+                <li class="list-group-item">
+                    <span class="glyphicon glyphicon-resize-vertical"></span>
+                    <span class="glyphicon glyphicon-home
+                        {%- if page == navSettings.homepage %} -active{% else %} -inactive{% endif %}"></span>
+                    {{ page }}
+                    <span class="glyphicon glyphicon-pencil pull-right"></span>&nbsp;
+                    </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Pages not in navigation</div>
+
+        <ul class="nav-list list-group">
+            {% for page in available_pages %}
+                <li class="list-group-item">
+                    <span class="glyphicon glyphicon-resize-vertical"></span>
+                    <span class="glyphicon glyphicon-home
+                        {%- if page == navSettings.homepage %} -active{% else %} -inactive{% endif %}"></span>
+                    {{ page }}
+                    <span class="glyphicon glyphicon-pencil pull-right"></span>&nbsp;
+                    </li>
+            {% endfor %}
+        </ul>
+    </div>
+    </div>
+    <pre>{{ navSettings|var_export }}</pre>
+{% endblock %}

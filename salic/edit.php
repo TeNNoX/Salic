@@ -9,16 +9,10 @@ if (!Utils::validAuthentication()) {
     exit; // Utils should call exit(), but just to be sure...
 }
 
-// for just /edit/, render the backend.
-if (!array_key_exists('page', $_GET) && !array_key_exists('lang', $_GET)) {
-    // main backend page
-    $salic = new SalicMng('en');
-    $salic->initTwig();
-    $salic->renderBackend();
-    exit;
-}
-
 $lang = strtolower(@$_GET['lang']);
+if(empty($lang)) {
+    $lang = LangSettings::get()->default;
+}
 if (!LangSettings::get()->exists($lang)) {
     echo "Invalid Language: '$lang'";
     exit;
@@ -27,7 +21,7 @@ if (!LangSettings::get()->exists($lang)) {
 $salic = new SalicMng($lang);
 $salic->initTwig();
 
-$page = strtolower($_GET['page']);
+$page = strtolower(@$_GET['page']);
 if (empty($page)) { // default page
     try {
         $page = Settings\NavSettings::get()->homepage;

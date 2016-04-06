@@ -169,4 +169,14 @@ class PageSettings extends Settings
         }
         return null;
     }
+
+    public static function pageExists($pagekey)
+    {
+        return is_dir(Settings::baseDir . "data/$pagekey");
+    }
+
+    public static function listAvailablePages()
+    {
+        return glob(Settings::baseDir . "data/*", GLOB_ONLYDIR);
+    }
 }

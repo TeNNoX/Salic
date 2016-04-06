@@ -25,6 +25,13 @@
   # /edit[/]
   RewriteRule ^edit/?$ edit.php [END,QSD]
 
+  # /backend/navigation[/]
+  RewriteRule ^backend/navigation/?$ backend.php?section=nav [END,QSD] # QSD = discard other GET params
+  # /backend/page/PAGEKEY[/]
+  RewriteRule ^backend/pages/(.*?)/?$ backend.php?section=pages&page=$1 [END,QSD] # QSD = discard other GET params
+  # /backend[/]
+  RewriteRule ^backend/?$ backend.php [END,QSD]
+
   # /LANG/[PAGE][/]    (no page = homepage)
   RewriteRule ^([A-z_-]+)/(.*?)/?$ index.php?lang=$1&page=$2 [END,QSD]
   # /PAGE[/]

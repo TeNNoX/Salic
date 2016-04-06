@@ -13,8 +13,7 @@ try {
     if (array_key_exists('lang', $_GET)) {
         $lang = $_GET['lang'];
         if (!Settings\LangSettings::get()->exists($lang)) {
-            echo "Invalid Language: $lang"; //TODO: ignore invalid language?
-            exit;
+            throw new \Exception("Invalid language: '$lang'"); //TODO: ignore invalid language?
         }
     } else {
         $lang = Utils::getDefaultLanguageFromHeader();  // language is not given, redirect to the best one

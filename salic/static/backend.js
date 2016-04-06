@@ -20,7 +20,7 @@ $(function () {
         }
     };
 
-    $("#content .panel-heading").click(function () { // only for testing :P
+    $("#nav-hamburger").click(function () { // toggle sidebar
         Salic.setSidebarState(!Salic.getSidebarState());
     });
 });

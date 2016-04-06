@@ -25,35 +25,24 @@
 <!--<div class="container-fluid">
     <div class="row">-->
 <div id="sidebar">
+
     <ul class="nav nav-sidebar">
-        <li id="logo">SaLiC</li>
-        <li>Pages</li>
-        <li>Content</li>
-        <li>VCS</li>
+        <li id="logo">
+            <a href="/backend/">SaLiC</a>
+            <div id="nav-hamburger"></div>
+        </li>
+
+        <li><a href="/backend/navigation/">Navigation</a></li>
+        <li><a href="/backend/pages/">Pages</a></li>
+        <li><i>Content</i></li>
+        <li><i>VCS</i></li>
     </ul>
 </div>
 
 <div id="content">
-    <div class="panel panel-default">
-        <div class="panel-heading">Pages</div>
-
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <tr>
-                    <th>Page key (=URL)</th>
-                    <th>Displayname</th>
-                    <th>Template</th>
-                </tr>
-                {% for key,page in pages %}
-                    <tr>
-                        <td><a href="/edit/{{ key }}">{{ key }}</a></td>
-                        <td>{{ page.name }}</td>
-                        <td>{{ page.template }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </div>
+    {% block content %}
+        <h1>Welcome to the dark side.</h1>
+    {% endblock content %}
 </div>
 <!--</div>
 </div>-->

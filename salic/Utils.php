@@ -101,8 +101,9 @@ class Utils
 
         foreach ($pages as $key) {
             $title = PageSettings::get($key)->title->get($lang); //TODO: what to do about titles for external pages
-            $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key . "/"); //TODO:? trailing slash optional
+            $href = array_key_exists($key, $external) ? $external[$key] : ($baseUrl . $key . "/");
             $nav_array[$key] = array(
+                'key' => $key,
                 'title' => $title,
                 'href' => $href,
             );
@@ -134,11 +135,6 @@ class Utils
             if (!mkdir($path, $mode, true))
                 throw new SalicSettingsException("Couldn't create directory", $path);
         }
-    }
-
-    public static function pageExists($pagekey)
-    {
-        return is_dir(Settings::baseDir . "data/$pagekey");
     }
 
     public static function endsWith($haystack, $needle)

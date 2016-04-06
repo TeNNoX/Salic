@@ -56,7 +56,7 @@ class NavSettings extends Settings
     public function validate()
     {
         // check homepage
-        if (!Utils::pageExists($this->homepage)) {// make sure the specified homepage exists
+        if (!PageSettings::pageExists($this->homepage)) {// make sure the specified homepage exists
             throw new SalicSettingsException("Page '{$this->homepage}' not found found in data/", $this->file . self::fis . 'homepage');
         }
 
@@ -67,7 +67,7 @@ class NavSettings extends Settings
             if (in_array($page, $externals))
                 continue; // if it is an external link, it doesn't need to exist
 
-            if (!Utils::pageExists($page)) {// make sure the specified page exists
+            if (!PageSettings::pageExists($page)) {// make sure the specified page exists
                 throw new SalicSettingsException("Page '{$page}' is neither in data/ nor an external_link", $this->file . self::fis . 'displayed');
             }
         }

@@ -1,0 +1,32 @@
+{% extends '@salic/backend.html.twig' %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">Pages</div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <tr>
+                    <th>Title [key]</th>
+                    <th>Template</th>
+                    <th>Actions</th>
+                </tr>
+                {#{% for key,page in pages %}
+                    <tr>
+                        <td>{#<a href="{{ page.href }}" title="Edit this page"># }
+                            {{- page.title }}
+                            {%- if key|lower != page.title|lower %} [{{ key }}] {%- endif %}
+                            {#<span class="glyphicon glyphicon-pencil"></span> </a># }</td>
+                        <td>{{ page.href }}</td>
+                        <td>
+                            <a href="{{ page.href }}" title="Edit page content">
+                                <span class="glyphicon glyphicon-pencil"></span></a>
+                            <a href="/backend/pages/{{ key }}/" title="Customize page structure">
+                                <span class="glyphicon glyphicon-wrench"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}#}
+            </table>
+        </div>
+    </div>
+{% endblock %}
