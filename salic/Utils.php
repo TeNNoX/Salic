@@ -151,4 +151,25 @@ class Utils
         $salic->renderError($e, $during);
         exit;
     }
+
+    /**
+     * @param string $parent The parent directory to scan, including trailing slash
+     * @param bool $includeParentPath If the results should contain the parent path
+     * @return array
+     */
+    public static function listDirs($parent, $includeParentPath = false)
+    {
+        $result = array();
+
+        $cdir = scandir($parent);
+        foreach ($cdir as $key => $value) {
+            if (!in_array($value, array(".", ".."))) {
+                if (is_dir($parent . DIRECTORY_SEPARATOR . $value)) {
+                    $result[] = $includeParentPath ? ($parent . $value) : $value;
+                }
+            }
+        }
+
+        return $result;
+    }
 }

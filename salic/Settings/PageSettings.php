@@ -58,7 +58,7 @@ class PageSettings extends Settings
     {
         $this->pageKey = $pageKey;
         //Utils::mkdirs(self::baseDir . "data/$pageKey");
-        if(!is_dir(self::baseDir . "pages/$pageKey")) {
+        if (!is_dir(self::baseDir . "pages/$pageKey")) {
             throw new SalicSettingsException("No page config for: '$pageKey'", "pages/$pageKey");
         }
         $this->file = 'pages/' . $pageKey . '/page.json';
@@ -129,7 +129,7 @@ class PageSettings extends Settings
                     throw new SalicSettingsException("Block '{$block['type']}' is not defined in blocks.json", $this->file . self::fis . "areas>$areaKey>$blockKey", BlockSettings::get()->blocktypes);
 
                 $blockSettings = BlockSettings::data2($block['type']);
-                if($blockSettings->subblocks === true) { // if the blocktype has variable subblocks, check if the count is given
+                if ($blockSettings->subblocks === true) { // if the blocktype has variable subblocks, check if the count is given
                     $block['subblock-count'] = self::getInt('subblock-count', $block, 1, "areas>$areaKey>$blockKey");
                 }
 
@@ -180,6 +180,6 @@ class PageSettings extends Settings
 
     public static function listAvailablePages()
     {
-        return glob(Settings::baseDir . "pages/*", GLOB_ONLYDIR);
+        return Utils::listDirs(Settings::baseDir . "pages/");
     }
 }
