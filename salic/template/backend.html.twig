@@ -59,12 +59,25 @@
 </div>-->
 
 
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/salic/static/vendor/jquery-1.12.2.min.js"><\/script>')</script>
 
 <!-- Latest compiled and minified Bootstrap JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
         crossorigin="anonymous"></script>
+<!-- local fallback for Bootstrap JS-->
+<script> if (typeof($.fn.modal) === 'undefined') {
+        document.write('<script src="/salic/static/vendor/bootstrap-3.3.6.min.js"><\/script>')
+    }</script>
+
+<!-- BOOTSTRAP CDN FALLBACK CSS https://github.com/MaxCDN/bootstrap-cdn/issues/111#issuecomment-14467221 -->
+<script>$(document).ready(function () {
+        var bodyColor = $('body').css("color");
+        if (bodyColor != 'rgb(51, 51, 51)') {
+            $("head").prepend("<link rel='stylesheet' href='/salic/static/vendor/bootstrap-3.3.6.min.css' type='text/css' media='screen'>");
+        }
+    });
+</script>
 
 <script src="/salic/static/backend.js"></script>
 </body>
