@@ -20,10 +20,10 @@
 
     <h3>Webmaster info:</h3>
 
+    <b>Message</b>: {{ exception.getMessage() }} <br>
     <b>Happened during</b>: {{ during }}<br>
 
     <b>Exception</b>: {{ exception|get_class }} <br>
-    <b>Message</b>: {{ exception.getMessage() }} <br>
     {% if exception is SettingsException %}
         <b>FileInfo</b>: {{ exception.fileInfo|var_export }} <br>
     {% endif %}

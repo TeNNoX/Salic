@@ -4,8 +4,14 @@ namespace Salic\Exception;
 
 class SalicSettingsException extends \Exception
 {
+    /**
+     * @var string The file that caused this.
+     */
     public $fileInfo;
-    public $data; // some kind of json-encodable object for debugging purposes
+    /**
+     * @var mixed Some kind of json-encodable object for debugging purposes.
+     */
+    public $data;
 
     public function __construct($message, $fileInfo, $data = null)
     {

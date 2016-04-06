@@ -24,14 +24,13 @@ try {
 
     if ($section == 'nav') {
         $salic->renderBackendPage('@salic/backend_nav.html.twig', array(
-            'navSettings' => NavSettings::get(),
+            'navSettings' => NavSettings::get(), //TODO: don't crash when the config is invalid, show an error with the possibility to fix it
             'available_pages' => PageSettings::listAvailablePages(),
         ));
         exit;
     } else if ($section == 'pages') {
         if (empty($_GET['page'])) {
-            $salic->renderBackendPage('@salic/backend_pages.html.twig', array(
-            ));
+            $salic->renderBackendPage('@salic/backend_pages.html.twig', array());
         }
     } else {
         throw new \Exception("Invalid section: '$section'");

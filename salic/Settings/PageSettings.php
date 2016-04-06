@@ -57,8 +57,11 @@ class PageSettings extends Settings
     public function __construct($pageKey)
     {
         $this->pageKey = $pageKey;
-        Utils::mkdirs(self::baseDir . "data/$pageKey");
-        $this->file = 'data/' . $pageKey . '/page.json';
+        //Utils::mkdirs(self::baseDir . "data/$pageKey");
+        if(!is_dir(self::baseDir . "pages/$pageKey")) {
+            throw new SalicSettingsException("No page config for: '$pageKey'", "pages/$pageKey");
+        }
+        $this->file = 'pages/' . $pageKey . '/page.json';
         parent::__construct();
     }
 
@@ -172,11 +175,11 @@ class PageSettings extends Settings
 
     public static function pageExists($pagekey)
     {
-        return is_dir(Settings::baseDir . "data/$pagekey");
+        return is_dir(Settings::baseDir . "pages/$pagekey");
     }
 
     public static function listAvailablePages()
     {
-        return glob(Settings::baseDir . "data/*", GLOB_ONLYDIR);
+        return glob(Settings::baseDir . "pages/*", GLOB_ONLYDIR);
     }
 }

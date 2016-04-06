@@ -57,7 +57,7 @@ class NavSettings extends Settings
     {
         // check homepage
         if (!PageSettings::pageExists($this->homepage)) {// make sure the specified homepage exists
-            throw new SalicSettingsException("Page '{$this->homepage}' not found found in data/", $this->file . self::fis . 'homepage');
+            throw new SalicSettingsException("Page '{$this->homepage}' not found found in pages/", $this->file . self::fis . 'homepage');
         }
 
 
