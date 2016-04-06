@@ -1,3 +1,18 @@
+## caching
+<ifmodule mod_expires.c=""> ## temporary values for developement TODO: update cache duration
+  ExpiresActive On
+  ExpiresByType image/gif "access plus 7 days"
+  ExpiresByType image/ico "access plus 7 days"
+  ExpiresByType image/jpeg "access plus 7 days"
+  ExpiresByType image/jpg "access plus 7 days"
+  ExpiresByType image/png "access plus 7 days"
+  ExpiresByType text/css "access plus 1 hours"
+  ExpiresByType text/javascript "access plus 1 hours"
+  ExpiresByType application/x-javascript "access plus 1 hours"
+  ExpiresByType application/javascript "access plus 1 hours"
+</ifmodule>
+
+
 ## Rewrite requests to the php file that handles it.
 ## Order: most specific > less specific
 <IfModule mod_rewrite.c>
