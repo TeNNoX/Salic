@@ -61,9 +61,9 @@ class Salic
         $loader->addPath(__DIR__ . '/template', 'salic');
 
         $this->twig = new Twig_Environment($loader, array(
-            /*'cache' => __DIR__ . '/compilation_cache',  ?debug */ //TODO: enable twig caching
+            'cache' => __DIR__ . '/../cache/twig_compilation_cache',
             'auto_reload' => true, //TODO: disable some twig settings for performance
-            'strict_variables' => true, // TODO: configurable (for salic vars too)
+            'strict_variables' => true, // TODO: configurable strict_vars (for salic vars too)
             'autoescape' => false, //TODO: autoescape variables?
             'debug' => GeneralSettings::get()->debugMode,
         ));
@@ -78,7 +78,6 @@ class Salic
     public function renderPage($pagekey)
     {
         try {
-            //TODO: sanitize pagekey (eg. trailing slash)
             if (!PageSettings::pageExists($pagekey)) { // when querying an invalid page, go to 404
                 $this->render404();
                 return;
