@@ -3,6 +3,7 @@
 namespace Salic\Settings;
 
 use Salic\Exception\SalicSettingsException;
+use Salic\Validator;
 
 
 class LangSettings extends Settings
@@ -46,6 +47,12 @@ class LangSettings extends Settings
 
     public function validate()
     {
+        foreach ($this->available as $key => $name) {
+            if (!Validator::checkLangKey($key)) {
+                throw new SalicSettingsException("Language format invalid: '$key'", $this->file . self::fis . 'available', $this->available);
+            }
+        }
+
         // check if default is in available
         if (!array_key_exists($this->default, $this->available)) {// make sure the specified homepage exists
             throw new SalicSettingsException("Default language '{$this->default}' not found found in available ",

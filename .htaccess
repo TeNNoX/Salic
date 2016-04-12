@@ -15,6 +15,7 @@
 
 ## Rewrite requests to the php file that handles it.
 ## Order: most specific > less specific
+## ! The regexes here should match the ones in salic/Validator.php !
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
@@ -33,9 +34,9 @@
 
 
   # /edit/lang/PAGE/save[/]
-  RewriteRule ^edit/([A-z_-]+)/(.+)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
+  RewriteRule ^edit/([A-Za-z-]+)/(.+)/save/?$ save.php?lang=$1&page=$2 [END,QSD] # QSD = discard other GET params
   # /edit/lang/[PAGE][/]    (no page = homepage)
-  RewriteRule ^edit/([A-z_-]+)/(.*?)/?$ edit.php?lang=$1&page=$2 [END,QSD] #TODO: '/edit/en'
+  RewriteRule ^edit/([A-Za-z-]+)/(.*?)/?$ edit.php?lang=$1&page=$2 [END,QSD]
   # /edit/PAGE[/] > TODO:? 'no language'-link support
   # /edit[/]
   RewriteRule ^edit/?$ edit.php [END,QSD]
@@ -48,7 +49,7 @@
   RewriteRule ^backend/?$ backend.php [END,QSD]
 
   # /LANG/[PAGE][/]    (no page = homepage)
-  RewriteRule ^([A-z_-]+)/(.*?)/?$ index.php?lang=$1&page=$2 [END,QSD]
+  RewriteRule ^([A-Za-z-]+)/(.*?)/?$ index.php?lang=$1&page=$2 [END,QSD]
   # /PAGE[/]
   #RewriteRule ^([^/]*)/?$ index.php?page=$1 [END,QSD]
   # /

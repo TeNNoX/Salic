@@ -152,6 +152,19 @@ class Utils
         exit;
     }
 
+    public static function dieWith404($reason = '', $salic = null)
+    {
+        if (empty($salic))
+            $salic = new Salic(LangSettings::get()->default);
+        if(!empty($reason)) {
+            echo "<!-- $reason -->"; // TODO: display 404 reason
+        }
+
+        $salic->initTwig();
+        $salic->render404();
+        exit;
+    }
+
     /**
      * @param string $parent The parent directory to scan, including trailing slash
      * @param bool $includeParentPath If the results should contain the parent path

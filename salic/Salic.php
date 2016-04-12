@@ -99,7 +99,7 @@ class Salic
         }
     }
 
-    private function render404()
+    public function render404()
     {
         try {
             http_response_code(404);

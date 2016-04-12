@@ -2,8 +2,10 @@
 
 namespace Salic\Settings;
 
+use Salic\Exception\SalicException;
 use Salic\Exception\SalicSettingsException;
 use Salic\Utils;
+use salic\Validator;
 
 class PageSettings extends Settings
 {
@@ -56,6 +58,10 @@ class PageSettings extends Settings
 
     public function __construct($pageKey)
     {
+        if(!Validator::checkPageKey($pageKey)) {
+            throw new SalicException("Invalid pagekey format: '$pageKey'");
+        }
+
         $this->pageKey = $pageKey;
         //Utils::mkdirs(self::baseDir . "data/$pageKey");
         if (!is_dir(self::baseDir . "pages/$pageKey")) {

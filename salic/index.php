@@ -1,23 +1,27 @@
 <?php
 namespace Salic;
 
+use Salic\Settings\LangSettings;
 use Salic\Settings\NavSettings;
 
 require_once('Salic.php');
 
 
 $page = strtolower($_GET['page']);
+if(!empty($page) && !Validator::checkPageKey($page)) {
+    Utils::dieWith404('there\'s an invalid symbol in the pagekey.');
+}
 
 // LANGUAGE SELECTION
 try {
     if (array_key_exists('lang', $_GET)) {
         $lang = $_GET['lang'];
         if (!Settings\LangSettings::get()->exists($lang)) {
-            throw new \Exception("Invalid language: '$lang'"); //TODO: ignore invalid language?
+            Utils::dieWith404("the language '$lang' is invalid.");
         }
     } else {
         $lang = Utils::getDefaultLanguageFromHeader();  // language is not given, redirect to the best one
-        http_response_code(302); //TODO: how to redirect properly for localisation
+        http_response_code(302); //TODO: how to redirect properly for localisation?
         header("Location:/$lang/$page");
         echo "Redirect: <a href='/$lang/$page'>/$lang/$page</a>";
         exit;

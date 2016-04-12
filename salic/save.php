@@ -13,15 +13,17 @@ if (!Utils::validAuthentication()) {
 
 $lang = strtolower($_GET['lang']);
 if (!LangSettings::get()->exists($lang)) {
-    echo "Invalid Language: $lang"; //TODO:
-    exit;
+    die('{"success": false, "error": "APIException - Invalid Language: ' . $lang . '"}');
 }
 
 $salic = new SalicMng($lang);
 
 $page = strtolower($_GET['page']);
 if (empty($page)) {
-    die('pagekey not given');
+    die('{"success": false, "error": "APIException - No pagekey given"}');
+}
+if(!Validator::checkPageKey($page)) {
+    die('{"success": false, "error": "APIException - Invalid pagekey"}');
 }
 
 $salic->savePage($page);

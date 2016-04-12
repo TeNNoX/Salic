@@ -22,6 +22,10 @@ $salic = new SalicMng($lang);
 $salic->initTwig();
 
 $page = strtolower(@$_GET['page']);
+if(!empty($page) && !Validator::checkPageKey($page)) {
+    Utils::dieWith404('there\'s an invalid symbol in the pagekey.');
+}
+
 if (empty($page)) { // default page
     try {
         $page = Settings\NavSettings::get()->homepage;
