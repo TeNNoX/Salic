@@ -1,9 +1,16 @@
 # SaLi CMS a.k.a. 'SaLiC'
 **Sa**ssy **Li**ttle **C**MS - a simple lightweight PHP CMS
 
-This is at the moment in active developement, but I am not sure if the result will ever be a complete, usable software for non-developers - although I would love to get to that point.
+# MOVED TO >[GITLAB](https://gitlab.com/tennoxlab/Salic)<
+## It's way cooler, has CI and more.
 
-It is **not ready for use**, yet.
+.  
+
+.  
+
+~~This is at the moment in active developement, but I am not sure if the result will ever be a complete, usable software for non-developers - although I would love to get to that point.~~
+
+~~It is **not ready for use**, yet.~~
 
 .
 
